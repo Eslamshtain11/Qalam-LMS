@@ -1,0 +1,10 @@
+(function(){'use strict';
+const cfg=window.Qalam140||{},dict=cfg.dictionary||{};
+function exact(v){if(typeof v!=='string')return v;const a=v.match(/^\\s*/)[0],b=v.match(/\\s*$/)[0],t=v.trim();return dict[t]!==undefined?a+dict[t]+b:v;}
+function skip(n){const p=n&&n.parentElement;return !p||/^(SCRIPT|STYLE|CODE|PRE|TEXTAREA|NOSCRIPT)$/.test(p.tagName)||!!p.closest('[contenteditable="true"]');}
+function translate(root){if(!root)return;try{const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode())){if(skip(n))continue;const x=exact(n.nodeValue);if(x!==n.nodeValue)n.nodeValue=x;}}catch(e){}try{root.querySelectorAll&&root.querySelectorAll('[placeholder],[title],[aria-label],[alt]').forEach(el=>['placeholder','title','aria-label','alt'].forEach(a=>{if(el.hasAttribute(a)){const v=el.getAttribute(a),x=exact(v);if(x!==v)el.setAttribute(a,x);}}));}catch(e){}}
+function brand(root){if(!root||!root.querySelectorAll)return;root.querySelectorAll('img').forEach(img=>{const a=((img.alt||'')+' '+(img.src||'')).toLowerCase();if(a.includes('tutor lms')||a.includes('tutor-logo')||a.includes('tutor-plugin'))img.alt='Qalam LMS';});root.querySelectorAll('a').forEach(a=>{if(/upgrade to pro|get pro/i.test((a.textContent||'').trim()))a.style.display='none';});}
+function mark(){document.documentElement.dir='rtl';document.documentElement.lang='ar';if(document.body){document.body.classList.add('qalam-f345-ui');if(location.pathname.includes('/exam/'))document.body.classList.add('qalam-standalone-exam');}}
+function run(){mark();translate(document.body);brand(document.body);new MutationObserver(ms=>{ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1){translate(n);brand(n);mark();}else if(n.nodeType===3&&!skip(n)){const x=exact(n.nodeValue);if(x!==n.nodeValue)n.nodeValue=x;}}));}).observe(document.documentElement,{subtree:true,childList:true});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
+})();

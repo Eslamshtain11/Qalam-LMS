@@ -1,0 +1,209 @@
+/* Qalam LMS 0.10 — complete Ocean design system. Loaded last. */
+:root,
+.qalam-v1-ui,
+.qalam-v1-admin,
+#tutor-course-builder{
+  --qalam-50:#faf7ff;--qalam-100:#f3e8ff;--qalam-200:#e9d5ff;--qalam-300:#d8b4fe;--qalam-400:#c084fc;
+  --qalam-500:#7c3aed;--qalam-600:#6d28d9;--qalam-700:#5b21b6;--qalam-800:#4c1d95;--qalam-900:#3b0764;--qalam-950:#2e1065;
+  --qalam-blue:#2563eb;--qalam-blue-soft:#eff6ff;--qalam-gold:#d97706;--qalam-red:#dc2626;--qalam-green:#15803d;
+  --qalam-bg:#f8fafc;--qalam-surface:#ffffff;--qalam-surface-2:#f1f5f9;--qalam-surface-3:#e2e8f0;
+  --qalam-ink:#0f172a;--qalam-muted:#475569;--qalam-faint:#64748b;--qalam-line:#dbe4ea;--qalam-line-2:#cbd5e1;
+  --qalam-shadow:0 14px 40px rgba(15,23,42,.08);--qalam-shadow-sm:0 6px 18px rgba(15,23,42,.055);
+  --qalam-radius:18px;--qalam-radius-sm:12px;
+  --tutor-brand-50:#faf7ff;--tutor-brand-100:#f3e8ff;--tutor-brand-200:#e9d5ff;--tutor-brand-300:#d8b4fe;--tutor-brand-400:#c084fc;
+  --tutor-brand-500:#7c3aed;--tutor-brand-600:#5b21b6;--tutor-brand-700:#4c1d95;--tutor-brand-800:#3b0764;--tutor-brand-900:#0b3b38;--tutor-brand-950:#2e1065;
+  --tutor-color-primary:#5b21b6;--tutor-color-primary-rgb:15,118,110;--tutor-body-color:#0f172a;
+  --tutor-surface-base:#f8fafc;--tutor-surface-l1:#fff;--tutor-surface-l1-hover:#faf7ff;--tutor-surface-l2:#e2e8f0;--tutor-surface-l3:#f1f5f9;
+  --tutor-surface-brand-dark:#2e1065;--tutor-surface-brand-primary:#5b21b6;--tutor-surface-brand-primary-2:#4c1d95;
+  --tutor-surface-brand-secondary:#e9d5ff;--tutor-surface-brand-tertiary:#faf7ff;--tutor-surface-brand-quaternary:#f3e8ff;
+  --tutor-surface-sidebar-l1:#fff;--tutor-surface-dark:#0f172a;
+  --tutor-text-primary:#0f172a;--tutor-text-primary-inverse:#fff;--tutor-text-secondary:#334155;--tutor-text-subdued:#64748b;
+  --tutor-text-brand:#5b21b6;--tutor-text-brand-hover:#4c1d95;--tutor-text-brand-secondary:#6d28d9;
+  --tutor-icon-idle:#334155;--tutor-icon-secondary:#64748b;--tutor-icon-subdued:#94a3b8;--tutor-icon-brand:#5b21b6;--tutor-icon-brand-hover:#4c1d95;
+  --tutor-button-primary:#5b21b6;--tutor-button-primary-hover:#4c1d95;--tutor-button-primary-focused:#5b21b6;--tutor-button-primary-disabled:#e9d5ff;
+  --tutor-button-primary-soft:#f3e8ff;--tutor-button-primary-soft-hover:#e9d5ff;--tutor-button-secondary:#e2e8f0;--tutor-button-secondary-hover:#cbd5e1;
+  --tutor-border-idle:#e2e8f0;--tutor-border-idle2:#dbe4ea;--tutor-border-hover:#cbd5e1;--tutor-border-tertiary:#94a3b8;
+  --tutor-border-brand:#5b21b6;--tutor-border-brand-secondary:#e9d5ff;--tutor-border-brand-tertiary:#d8b4fe;
+  --tutor-tab-sidebar-l2:#fff;--tutor-tab-sidebar-l2-hover:#faf7ff;--tutor-tab-sidebar-l2-active:#f3e8ff;--tutor-tab-l3:#f3e8ff;--tutor-tab-l3-hover:#e9d5ff;--tutor-tab-l3-active:#f3e8ff;
+  --tutor-actions-brand-primary:#5b21b6;--tutor-actions-brand-secondary:#e9d5ff;--tutor-actions-brand-tertiary:#f3e8ff;
+}
+html{scroll-behavior:smooth}
+body.qalam-v1-ui{background:var(--qalam-bg)!important;color:var(--qalam-ink)!important}
+body.qalam-v1-ui *,body.qalam-v1-admin *{box-sizing:border-box}
+body.qalam-v1-ui img,body.qalam-v1-ui video,body.qalam-v1-ui iframe{max-width:100%;height:auto}
+body.qalam-v1-ui a{color:var(--qalam-700)}
+body.qalam-v1-ui a:hover{color:var(--qalam-800)}
+body.qalam-v1-ui :focus-visible,body.qalam-v1-admin :focus-visible{outline:3px solid rgba(13,148,136,.28)!important;outline-offset:2px!important}
+
+/* Buttons / inputs: one visual language everywhere */
+.qalam-v1-ui .tutor-btn,.qalam-v1-admin .tutor-btn,#tutor-course-builder button,
+.qalam-v1-admin .button-primary,.qalam-v1-admin .qalam-btn,.qalam-v1-ui .qalam-btn{
+  min-height:44px;border-radius:12px!important;font-weight:750!important;box-shadow:none!important;transition:.18s ease!important
+}
+.qalam-v1-ui .tutor-btn-primary,.qalam-v1-admin .tutor-btn-primary,.qalam-v1-admin .button-primary,
+.qalam-v1-ui .qalam-btn-primary,.qalam-v1-admin .qalam-btn-primary{
+  background:linear-gradient(135deg,#5b21b6,#6d28d9)!important;border-color:#5b21b6!important;color:#fff!important
+}
+.qalam-v1-ui .tutor-btn-primary:hover,.qalam-v1-admin .tutor-btn-primary:hover,.qalam-v1-admin .button-primary:hover{background:#4c1d95!important;border-color:#4c1d95!important;transform:translateY(-1px)}
+.qalam-v1-ui input:not([type=checkbox]):not([type=radio]):not([type=range]),.qalam-v1-ui select,.qalam-v1-ui textarea,
+.qalam-v1-admin input:not([type=checkbox]):not([type=radio]):not([type=range]),.qalam-v1-admin select,.qalam-v1-admin textarea,
+#tutor-course-builder input:not([type=range]),#tutor-course-builder select,#tutor-course-builder textarea{
+  background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line-2)!important;border-radius:12px!important;min-height:44px!important;box-shadow:none!important
+}
+.qalam-v1-ui input:focus,.qalam-v1-ui select:focus,.qalam-v1-ui textarea:focus,.qalam-v1-admin input:focus,.qalam-v1-admin select:focus,.qalam-v1-admin textarea:focus{border-color:#6d28d9!important;box-shadow:0 0 0 3px rgba(13,148,136,.12)!important}
+.qalam-v1-ui input[type=radio],.qalam-v1-ui input[type=checkbox],.qalam-v1-admin input[type=radio],.qalam-v1-admin input[type=checkbox]{accent-color:#5b21b6}
+
+/* Student dashboard shell */
+.qalam-v1-ui .tutor-dashboard,.qalam-v1-ui .tutor-dashboard-main,.qalam-v1-ui .tutor-dashboard-content,.qalam-v1-ui .tutor-dashboard-body{background:var(--qalam-bg)!important;color:var(--qalam-ink)!important}
+.qalam-v1-ui .tutor-dashboard-header-inner,.qalam-v1-ui .tutor-dashboard-content-inner,.qalam-v1-ui .tutor-card,
+.qalam-v1-ui .tutor-dashboard-widget,.qalam-v1-ui .tutor-dashboard-content .tutor-card{
+  background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important
+}
+.qalam-v1-ui .tutor-dashboard-header-inner{padding:18px 20px!important}
+.qalam-v1-ui .tutor-dashboard-header-display-name,.qalam-v1-ui .tutor-dashboard-header-display-name *,.qalam-v1-ui .tutor-dashboard-content h1,.qalam-v1-ui .tutor-dashboard-content h2,.qalam-v1-ui .tutor-dashboard-content h3,.qalam-v1-ui .tutor-dashboard-content h4{color:var(--qalam-ink)!important}
+.qalam-v1-ui .tutor-dashboard-sidebar{background:#fff!important;border-inline-end:1px solid var(--qalam-line)!important;box-shadow:8px 0 28px rgba(15,23,42,.035)!important}
+.qalam-v1-ui .tutor-dashboard-permalinks a{color:#334155!important;border-radius:12px!important;margin:3px 8px!important}
+.qalam-v1-ui .tutor-dashboard-permalinks a:hover{background:#faf7ff!important;color:#5b21b6!important}
+.qalam-v1-ui .tutor-dashboard-permalinks li.active a,.qalam-v1-ui .tutor-dashboard-permalinks a.active{background:#f3e8ff!important;color:#4c1d95!important;font-weight:800!important}
+
+/* Profile completion: remove the old dark card completely */
+.qalam-v1-ui .tutor-profile-completion,.qalam-v1-ui .tutor-profile-completion-header,.qalam-v1-ui .tutor-profile-completion-body{
+  background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important
+}
+.qalam-v1-ui .tutor-profile-completion{border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important;overflow:hidden!important}
+.qalam-v1-ui .tutor-profile-completion-header{padding:16px 18px!important}
+.qalam-v1-ui .tutor-profile-completion-body{border-top:1px solid var(--qalam-line)!important;padding:14px 18px!important}
+.qalam-v1-ui .tutor-profile-completion .tutor-text-secondary,.qalam-v1-ui .tutor-profile-completion .tutor-text-subdued{color:var(--qalam-muted)!important}
+.qalam-v1-ui .tutor-profile-completion .tutor-text-brand{color:#5b21b6!important}
+
+/* Stats and course cards */
+.qalam-v1-ui .tutor-dashboard-content .tutor-row>[class*=tutor-col]>.tutor-card,.qalam-v1-ui .tutor-dashboard-content [class*=stat],
+.qalam-v1-ui .tutor-course-card,.qalam-v1-ui .tutor-course-list .tutor-card,.qalam-v1-ui .tutor-course-card-inner{
+  background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important
+}
+.qalam-v1-ui .tutor-course-card:hover{transform:translateY(-2px);box-shadow:var(--qalam-shadow)!important}
+.qalam-v1-ui .tutor-course-card img{border-radius:14px!important}
+.qalam-v1-ui .tutor-course-name,.qalam-v1-ui .tutor-course-name a{color:var(--qalam-ink)!important;font-weight:800!important}
+
+/* Learning area */
+.qalam-v1-ui .tutor-course-single-content-wrapper,.qalam-v1-ui .tutor-learning-area,.qalam-v1-ui .tutor-learning-area-main,.qalam-v1-ui .tutor-course-single-content-wrapper>main{background:var(--qalam-bg)!important;color:var(--qalam-ink)!important}
+.qalam-v1-ui .tutor-course-single-sidebar-wrapper,.qalam-v1-ui .tutor-course-single-sidebar-title,.qalam-v1-ui .tutor-course-single-sidebar-wrapper .tutor-course-topic{background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important}
+.qalam-v1-ui .tutor-course-single-sidebar-wrapper .tutor-course-topic-item{background:#fff!important;color:#334155!important;border-color:#eef2f6!important}
+.qalam-v1-ui .tutor-course-single-sidebar-wrapper .tutor-course-topic-item:hover{background:#faf7ff!important;color:#5b21b6!important}
+.qalam-v1-ui .tutor-course-single-sidebar-wrapper .tutor-course-topic-item.is-active,.qalam-v1-ui .tutor-course-single-sidebar-wrapper .tutor-course-topic-item.active{background:#f3e8ff!important;color:#4c1d95!important}
+.qalam-v1-ui .tutor-course-single-content-wrapper .tutor-lesson-wrapper,.qalam-v1-ui .tutor-course-single-content-wrapper .tutor-course-info,.qalam-v1-ui .tutor-course-single-content-wrapper .tutor-course-announcements,.qalam-v1-ui .tutor-learning-area-qna,.qalam-v1-ui .tutor-learning-area-reviews{background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important}
+
+/* Quiz intro / summary / attempts / results: no dark islands. */
+.qalam-v1-ui .tutor-quiz,.qalam-v1-ui .tutor-quiz-wrap,.qalam-v1-ui .tutor-quiz-submission,.qalam-v1-ui .tutor-quiz-attempt-details,
+.qalam-v1-ui .tutor-quiz-result,.qalam-v1-ui .tutor-quiz-result-content,.qalam-v1-ui .tutor-quiz-attempt-history,.qalam-v1-ui .quiz-attempt-single-question{
+  background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important
+}
+.qalam-v1-ui .tutor-quiz-submission,.qalam-v1-ui .tutor-quiz-result,.qalam-v1-ui .tutor-quiz-attempt-details{border:1px solid var(--qalam-line)!important;border-radius:20px!important;box-shadow:var(--qalam-shadow-sm)!important;overflow:hidden!important}
+.qalam-v1-ui .tutor-quiz-submission table,.qalam-v1-ui .tutor-quiz-result table,.qalam-v1-ui .tutor-quiz-attempt-details table{background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important}
+.qalam-v1-ui .tutor-quiz-submission td,.qalam-v1-ui .tutor-quiz-submission th,.qalam-v1-ui .tutor-quiz-result td,.qalam-v1-ui .tutor-quiz-result th{background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important}
+.qalam-v1-ui .tutor-quiz-attempt-details .tutor-card,.qalam-v1-ui [class*=quiz-attempt] .tutor-card{background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important}
+.qalam-v1-ui .tutor-quiz-attempt-details [style*="background"],.qalam-v1-ui .tutor-quiz-result [style*="background"]{color:var(--qalam-ink)!important}
+
+/* Quiz question renderer, both legacy and v4 */
+.qalam-v1-ui .quiz-attempt-single-question,.qalam-v1-ui .quiz-attempt-single-question .quiz-question,.qalam-v1-ui .tutor-quiz-question,.qalam-v1-ui .tutor-quiz-question-wrapper{
+  background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:20px!important;box-shadow:var(--qalam-shadow-sm)!important
+}
+.qalam-v1-ui .quiz-attempt-single-question{max-width:920px!important;margin-inline:auto!important;padding:24px!important}
+.qalam-v1-ui .quiz-attempt-single-question .quiz-question{border:0!important;box-shadow:none!important;padding:0!important}
+.qalam-v1-ui .quiz-question-title,.qalam-v1-ui .quiz-question-title *,.qalam-v1-ui .tutor-quiz-question-title,.qalam-v1-ui .tutor-quiz-question-title *,.qalam-v1-ui .tutor-quiz-question-description,.qalam-v1-ui .tutor-quiz-question-description *{color:var(--qalam-ink)!important;opacity:1!important;text-shadow:none!important}
+.qalam-v1-ui .quiz-question-title,.qalam-v1-ui .tutor-quiz-question-title{font-size:clamp(18px,2vw,24px)!important;font-weight:850!important;line-height:1.75!important}
+.qalam-v1-ui .quiz-question-ans-choice-area .tutor-card,.qalam-v1-ui .quiz-question-ans-choice-area .tutor-quiz-question-item,.qalam-v1-ui .tutor-quiz-question-option{
+  background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line-2)!important;border-radius:14px!important;min-height:54px!important;box-shadow:none!important
+}
+.qalam-v1-ui .quiz-question-ans-choice-area .tutor-quiz-question-item:hover,.qalam-v1-ui .tutor-quiz-question-option:hover{background:#faf7ff!important;border-color:#d8b4fe!important}
+.qalam-v1-ui .quiz-question-ans-choice-area .tutor-quiz-question-item:has(input:checked),.qalam-v1-ui .tutor-quiz-question-option:has(input:checked){background:#f3e8ff!important;border-color:#5b21b6!important;box-shadow:0 0 0 2px rgba(15,118,110,.10)!important}
+.qalam-v1-ui .quiz-question-ans-choice-area label,.qalam-v1-ui .quiz-question-ans-choice-area span,.qalam-v1-ui .tutor-quiz-question-option label{color:var(--qalam-ink)!important;font-size:16px!important;line-height:1.65!important}
+.qalam-v1-ui .tutor-quiz-question-option input[type=radio],.qalam-v1-ui .tutor-quiz-question-option input[type=checkbox]{width:20px!important;height:20px!important;min-width:20px!important}
+.qalam-v1-ui .tutor-scale-question,.qalam-v1-ui .tutor-draw-image-question,.qalam-v1-ui .tutor-pin-image-question,.qalam-v1-ui .tutor-puzzle-question,.qalam-v1-ui .tutor-coordinates-question{background:#f8fafc!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:16px!important;padding:16px!important}
+.qalam-v1-ui .tutor-scale,.qalam-v1-ui .tutor-scale-slider{background:#f3e8ff!important;border-color:#5b21b6!important}
+.qalam-v1-ui .tutor-scale-bubble{background:#5b21b6!important;color:#fff!important;border-color:#5b21b6!important}
+.qalam-v1-ui .tutor-quiz-footer,.qalam-v1-ui .quiz-answer-footer-bar,.qalam-v1-ui .tutor-quiz-btn-group{background:#fff!important;border-color:var(--qalam-line)!important;box-shadow:0 -8px 25px rgba(15,23,42,.06)!important}
+
+/* Hide the AI floating assistant while a learner is actively taking a quiz. */
+.qalam-v1-ui.qalam-quiz-shell [class*=qalam-ai],.qalam-v1-ui .tutor-quiz-attempt-details~[class*=qalam-ai],.qalam-v1-ui body.tutor-quiz-attempt [class*=qalam-ai]{display:none!important}
+
+/* Login / registration / profile */
+.qalam-v1-ui .tutor-login-wrap,.qalam-v1-ui .tutor-registration-wrap,.qalam-v1-ui .tutor-profile,.qalam-v1-ui .tutor-profile-form{background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:20px!important;box-shadow:var(--qalam-shadow)!important}
+
+/* Ecommerce */
+.qalam-v1-ui .tutor-cart-page,.qalam-v1-ui .tutor-checkout-page,.qalam-v1-ui .tutor-order-status-wrapper{background:var(--qalam-bg)!important;color:var(--qalam-ink)!important}
+.qalam-v1-ui .tutor-checkout-details-inner,.qalam-v1-ui .tutor-checkout-payment-options,.qalam-v1-ui .tutor-order-status-wrapper{background:#fff!important;border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important}
+.qalam-v1-ui .tutor-checkout-payment-item.active{background:#faf7ff!important;box-shadow:inset 0 0 0 1px #d8b4fe!important}
+
+/* Qalam custom public/admin pages */
+.qalam-v1-ui .qalam-page,.qalam-v1-ui [class*=qalam-][class*=page],.qalam-v1-admin .qalam-admin-page,.qalam-v1-admin .qalam-page{
+  background:var(--qalam-bg)!important;color:var(--qalam-ink)!important
+}
+.qalam-v1-ui [class*=qalam-card],.qalam-v1-admin [class*=qalam-card],.qalam-v1-admin .qalam-addon-card,.qalam-v1-admin .qalam-question-bank-card,.qalam-v1-admin .qalam-panel{
+  background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important
+}
+
+/* WordPress/Tutor admin surfaces */
+body.qalam-v1-admin #wpcontent,body.qalam-v1-admin #wpbody-content{background:#f8fafc!important}
+.qalam-v1-admin .tutor-admin-wrap,.qalam-v1-admin .tutor-backend-settings-page,.qalam-v1-admin .tutor-option-main-wrap,.qalam-v1-admin .tutor-option-main-title{color:var(--qalam-ink)!important}
+.qalam-v1-admin .tutor-option-nav,.qalam-v1-admin .tutor-option-nav-page,.qalam-v1-admin .tutor-option-field,.qalam-v1-admin .tutor-admin-card,.qalam-v1-admin .tutor-card{
+  background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important;box-shadow:var(--qalam-shadow-sm)!important
+}
+.qalam-v1-admin .tutor-option-nav{border-radius:18px!important;overflow:hidden!important}
+.qalam-v1-admin .tutor-option-nav a,.qalam-v1-admin .tutor-option-nav li{color:#475569!important}
+.qalam-v1-admin .tutor-option-nav .active,.qalam-v1-admin .tutor-option-nav a:hover{background:#faf7ff!important;color:#5b21b6!important}
+.qalam-v1-admin table,.qalam-v1-admin .wp-list-table,.qalam-v1-admin .tutor-table{background:#fff!important;color:var(--qalam-ink)!important;border-color:var(--qalam-line)!important;border-radius:14px!important;overflow:hidden!important}
+.qalam-v1-admin th{background:#f8fafc!important;color:#334155!important}.qalam-v1-admin td{background:#fff!important;color:#334155!important;border-color:#eef2f6!important}
+
+/* React course builder and other Emotion apps. */
+#tutor-course-builder{background:#f8fafc!important;color:#0f172a!important;min-height:100vh}
+#tutor-course-builder [role=dialog],#tutor-course-builder [class*=modal],#tutor-course-builder [class*=popover]{color:#0f172a!important}
+#tutor-course-builder button:not([disabled]){border-radius:10px!important}
+#tutor-course-builder button[aria-pressed=true],#tutor-course-builder button[data-active=true]{background:#f3e8ff!important;color:#4c1d95!important}
+
+/* Modals/offcanvas/dropdowns */
+.qalam-v1-ui .tutor-modal-content,.qalam-v1-admin .tutor-modal-content,.qalam-v1-ui .tutor-offcanvas-main,.qalam-v1-admin .tutor-offcanvas-main,
+.qalam-v1-ui .tutor-dropdown-menu,.qalam-v1-admin .tutor-dropdown-menu{
+  background:#fff!important;color:var(--qalam-ink)!important;border:1px solid var(--qalam-line)!important;border-radius:16px!important;box-shadow:var(--qalam-shadow)!important
+}
+
+/* Reports / gradebook / certificates / add-ons / live classes */
+.qalam-v1-admin [class*=report],.qalam-v1-admin [class*=gradebook],.qalam-v1-admin [class*=certificate],.qalam-v1-admin [class*=addon],.qalam-v1-admin [class*=zoom],.qalam-v1-admin [class*=google-meet]{color:var(--qalam-ink)!important}
+.qalam-v1-admin [class*=report] .tutor-card,.qalam-v1-admin [class*=gradebook] .tutor-card,.qalam-v1-admin [class*=certificate] .tutor-card,.qalam-v1-admin [class*=zoom] .tutor-card,.qalam-v1-admin [class*=google-meet] .tutor-card{background:#fff!important;border-color:var(--qalam-line)!important}
+
+/* Mobile first: genuine reflow, not desktop shrink. */
+@media(max-width:782px){
+  html,body.qalam-v1-ui{overflow-x:hidden!important}
+  body.qalam-v1-ui{font-size:16px!important}
+  #wpadminbar{max-width:100vw!important;overflow-x:auto!important;overflow-y:hidden!important}
+  .qalam-v1-ui .tutor-container,.qalam-v1-ui .tutor-container-fluid{width:100%!important;max-width:100%!important;padding-inline:12px!important}
+  .qalam-v1-ui .tutor-dashboard{display:block!important;padding-bottom:92px!important}
+  .qalam-v1-ui .tutor-dashboard-sidebar{display:none!important}
+  .qalam-v1-ui .tutor-dashboard-content,.qalam-v1-ui .tutor-dashboard-content-inner,.qalam-v1-ui .tutor-dashboard-body{width:100%!important;max-width:100%!important;margin:0!important;padding:12px!important}
+  .qalam-v1-ui .tutor-dashboard-header{padding:10px 12px 0!important}.qalam-v1-ui .tutor-dashboard-header-inner{padding:14px!important;border-radius:16px!important}
+  .qalam-v1-ui .tutor-dashboard-nav-mobile{position:fixed!important;z-index:9999!important;inset-inline:10px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;width:auto!important;background:rgba(255,255,255,.97)!important;border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:0 14px 36px rgba(15,23,42,.16)!important;padding:6px!important;backdrop-filter:blur(16px)}
+  .qalam-v1-ui .tutor-dashboard-nav-mobile a{min-height:48px!important;border-radius:12px!important;color:#64748b!important}.qalam-v1-ui .tutor-dashboard-nav-mobile a.active{background:#f3e8ff!important;color:#5b21b6!important}
+  .qalam-v1-ui .tutor-profile-completion{margin:10px 0!important}.qalam-v1-ui .tutor-profile-completion-header{padding:14px!important}.qalam-v1-ui .tutor-profile-completion-header>.tutor-flex{gap:10px!important}
+  .qalam-v1-ui .tutor-dashboard-content .tutor-row{margin-inline:-5px!important}.qalam-v1-ui .tutor-dashboard-content .tutor-row>[class*=tutor-col]{padding-inline:5px!important;margin-bottom:10px!important}
+  .qalam-v1-ui .tutor-course-single-content-wrapper{display:block!important;min-height:100vh!important}.qalam-v1-ui .tutor-course-single-sidebar-wrapper{position:static!important;width:100%!important;max-width:none!important;height:auto!important;max-height:42vh!important;border:1px solid var(--qalam-line)!important;border-radius:16px!important;margin:8px 0!important;overflow:auto!important}
+  .qalam-v1-ui .tutor-course-single-content-wrapper>main,.qalam-v1-ui .tutor-learning-area-main{width:100%!important;max-width:100%!important;padding:10px!important}
+  .qalam-v1-ui .quiz-attempt-single-question,.qalam-v1-ui .tutor-quiz-question,.qalam-v1-ui .tutor-quiz-question-wrapper{width:100%!important;max-width:100%!important;border-radius:16px!important;padding:16px!important;margin:8px 0!important}
+  .qalam-v1-ui .quiz-question-title,.qalam-v1-ui .tutor-quiz-question-title{font-size:18px!important;line-height:1.75!important}
+  .qalam-v1-ui .quiz-question-ans-choice-area .tutor-quiz-question-item,.qalam-v1-ui .tutor-quiz-question-option{min-height:56px!important;margin-bottom:10px!important}
+  .qalam-v1-ui .tutor-quiz-footer,.qalam-v1-ui .quiz-answer-footer-bar,.qalam-v1-ui .tutor-quiz-btn-group{position:sticky!important;bottom:0!important;z-index:100!important;padding:10px 12px calc(10px + env(safe-area-inset-bottom))!important;display:flex!important;gap:8px!important;flex-wrap:wrap!important}
+  .qalam-v1-ui .tutor-quiz-footer .tutor-btn,.qalam-v1-ui .quiz-answer-footer-bar .tutor-btn,.qalam-v1-ui .tutor-quiz-btn-group .tutor-btn{flex:1 1 120px!important;min-width:0!important;min-height:48px!important}
+  .qalam-v1-ui .tutor-scale-question,.qalam-v1-ui .tutor-draw-image-question,.qalam-v1-ui .tutor-pin-image-question,.qalam-v1-ui .tutor-puzzle-question,.qalam-v1-ui .tutor-coordinates-question{padding:10px!important;overflow:auto!important}
+  .qalam-v1-ui table,.qalam-v1-admin table{min-width:640px}.qalam-v1-ui .tutor-table-wrapper,.qalam-v1-admin .tutor-table-wrapper,.qalam-v1-admin .qalam-table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  .qalam-v1-ui .tutor-modal,.qalam-v1-admin .tutor-modal{padding:0!important;align-items:flex-end!important}.qalam-v1-ui .tutor-modal-content,.qalam-v1-admin .tutor-modal-content{width:100%!important;max-width:none!important;max-height:92dvh!important;border-radius:22px 22px 0 0!important;overflow:auto!important}
+  .qalam-v1-admin #wpcontent{padding-left:0!important}.qalam-v1-admin .wrap,.qalam-v1-admin .tutor-admin-wrap,.qalam-v1-admin .qalam-admin-page{margin:10px!important;width:auto!important;max-width:calc(100vw - 20px)!important}
+  .qalam-v1-admin [class*=qalam-grid],.qalam-v1-admin .qalam-addon-grid,.qalam-v1-admin .qalam-question-count-grid{grid-template-columns:1fr!important}
+  #tutor-course-builder{width:100vw!important;max-width:100vw!important;overflow-x:hidden!important}#tutor-course-builder [role=dialog]{width:100%!important;max-width:100vw!important;min-width:0!important}
+}
+@media(max-width:480px){
+  .qalam-v1-ui .tutor-dashboard-content .tutor-row>[class*=tutor-col]{width:100%!important;flex:0 0 100%!important;max-width:100%!important}
+  .qalam-v1-ui .tutor-dashboard-content .tutor-row>[class*=tutor-col-sm-6],.qalam-v1-ui .tutor-dashboard-content .tutor-row>[class*=tutor-col-md-6]{width:50%!important;flex:0 0 50%!important;max-width:50%!important}
+  .qalam-v1-ui .tutor-dashboard-content .tutor-row>[class*=tutor-col-sm-6] .tutor-card,.qalam-v1-ui .tutor-dashboard-content .tutor-row>[class*=tutor-col-md-6] .tutor-card{min-height:120px!important;padding:14px!important}
+  .qalam-v1-ui .tutor-quiz-footer .tutor-btn,.qalam-v1-ui .quiz-answer-footer-bar .tutor-btn,.qalam-v1-ui .tutor-quiz-btn-group .tutor-btn{font-size:14px!important;padding-inline:10px!important}
+}
+
+@media(max-width:782px){.qalam-ai-mobile-compact{max-width:48px!important;width:48px!important;min-width:48px!important;height:48px!important;padding:0!important;border-radius:50%!important;overflow:hidden!important;font-size:0!important;inset-inline-end:12px!important;bottom:82px!important}.qalam-ai-mobile-compact svg,.qalam-ai-mobile-compact i{width:22px!important;height:22px!important;margin:auto!important}}

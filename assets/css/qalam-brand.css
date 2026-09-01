@@ -1,0 +1,86 @@
+/* Qalam LMS 0.3 teacher UI */
+:root{
+ --qalam-primary:#5b21b6;--qalam-primary-hover:#4c1d95;--qalam-secondary:#7c3aed;--qalam-accent:#d8b4fe;
+ --qalam-background:#f8f7ff;--qalam-surface:#fff;--qalam-text:#20143a;--qalam-muted:#6b6478;--qalam-border:#e4def2;
+ --qalam-success:#168b5b;--qalam-warning:#b7791f;--qalam-danger:#c53030;
+ --tutor-color-primary:#5b21b6;--tutor-color-primary-hover:#4c1d95;--tutor-color-primary-rgb:109,40,217;
+ --tutor-brand-100:#ecfdf5;--tutor-brand-200:#e9d5ff;--tutor-brand-300:#d8b4fe;--tutor-brand-400:#c084fc;
+ --tutor-brand-450:#d8b4fe;--tutor-brand-500:#7c3aed;--tutor-brand-600:#6d28d9;--tutor-brand-700:#5b21b6;
+ --tutor-brand-800:#4c1d95;--tutor-brand-900:#4c1d95;--tutor-brand-950:#2e1065;
+ --tutor-actions-brand-primary:#5b21b6;--tutor-actions-brand-secondary:#ede9fe;--tutor-actions-brand-tertiary:#f5f3ff;
+ --tutor-border-brand:#7c3aed;--tutor-border-brand-secondary:#e9d5ff;--tutor-border-brand-tertiary:#ede9fe;
+ --tutor-button-primary:#5b21b6;--tutor-button-primary-hover:#4c1d95;--tutor-button-primary-focused:#4c1d95;
+ --tutor-button-primary-soft:#ecfdf5;--tutor-button-primary-soft-hover:#ede9fe;--tutor-button-primary-soft-focused:#ede9fe;
+ --tutor-icon-brand:#5b21b6;--tutor-icon-brand-hover:#4c1d95;--tutor-icon-brand-secondary:#7c3aed;
+ --tutor-surface-brand-primary:#5b21b6;--tutor-surface-brand-primary-2:#6d28d9;--tutor-surface-brand-secondary:#ede9fe;
+ --tutor-surface-brand-tertiary:#f5f3ff;--tutor-surface-brand-quaternary:#faf5ff;--tutor-surface-brand-dark:#4c1d95;
+ --tutor-text-brand:#5b21b6;--tutor-tab-sidebar-l2-active:#ecfdf5;--tutor-tab-sidebar-l2-hover:#faf5ff;
+}
+body.qalam-lms-rtl .tutor-wrap,body.qalam-lms-rtl .tutor-dashboard,body.qalam-lms-rtl .tutor-course-builder,
+body.qalam-lms-rtl .tutor-course-builder-wrapper,body.qalam-lms-rtl .tutor-quiz-builder,body.qalam-lms-rtl [class*="tutor-dashboard"],
+body.qalam-lms-rtl [class*="tutor-course-builder"],body.qalam-lms-rtl [class*="tutor-quiz"]{direction:rtl;text-align:right}
+body.qalam-lms-rtl .tutor-row{direction:rtl}
+body.qalam-lms-rtl input,body.qalam-lms-rtl textarea,body.qalam-lms-rtl select{text-align:right}
+body.qalam-lms-rtl .tutor-form-check-input{margin-left:.5rem;margin-right:0}
+body.qalam-lms-rtl .tutor-dashboard-sidebar{border-inline-start:0;border-inline-end:1px solid var(--tutor-border-idle)}
+body.qalam-lms-rtl .tutor-dashboard-sidebar-logo:has(img[src*="tutor-logo"]) img,
+body.qalam-lms-rtl img[src*="tutor-logo.png"],body.qalam-lms-rtl img[alt="Tutor LMS"]{display:none!important}
+body.qalam-lms-rtl .tutor-dashboard-sidebar-logo:has(img[src*="tutor-logo"]):after,
+body.qalam-lms-rtl .tutor-dashboard-sidebar-logo:empty:after{content:"قلم";color:var(--qalam-primary);font-size:28px;font-weight:800;letter-spacing:-1px}
+body.qalam-lms-rtl .tutor-btn-primary,body.qalam-lms-rtl .tutor-button-primary{background:var(--qalam-primary)!important;border-color:var(--qalam-primary)!important}
+body.qalam-lms-rtl .tutor-btn-primary:hover,body.qalam-lms-rtl .tutor-button-primary:hover{background:var(--qalam-primary-hover)!important;border-color:var(--qalam-primary-hover)!important}
+body.qalam-lms-rtl a:focus-visible,body.qalam-lms-rtl button:focus-visible,body.qalam-lms-rtl input:focus-visible,
+body.qalam-lms-rtl select:focus-visible,body.qalam-lms-rtl textarea:focus-visible{outline:2px solid var(--qalam-accent)!important;outline-offset:2px}
+.tutor-admin-wrap .tutor-nav-link.is-active,.tutor-admin-wrap .tutor-nav-link.active{color:var(--qalam-primary)!important}
+.tutor-admin-wrap .tutor-nav-link.is-active:after,.tutor-admin-wrap .tutor-nav-link.active:after{background:var(--qalam-primary)!important}
+@media(max-width:768px){body.qalam-lms-rtl .tutor-dashboard-page{padding-left:16px;padding-right:16px}body.qalam-lms-rtl .tutor-modal{direction:rtl}}
+
+/* Qalam 0.3.1 teacher builder hardening */
+body.qalam-lms-rtl [class*="course-builder"]{direction:rtl!important;text-align:right!important}
+body.qalam-lms-rtl [class*="course-builder"] input,body.qalam-lms-rtl [class*="course-builder"] textarea{direction:rtl!important;text-align:right!important}
+body.qalam-lms-rtl button[style*="rgb(62, 100, 222)"],body.qalam-lms-rtl button[style*="#5b21b6"],body.qalam-lms-rtl button[style*="#5B21B6"]{background:#5b21b6!important;border-color:#5b21b6!important}
+body.qalam-lms-rtl .tutor-btn-primary,body.qalam-lms-rtl button.tutor-btn-primary{background:#5b21b6!important;border-color:#5b21b6!important;color:#fff!important}
+body.qalam-lms-rtl a{--tutor-color-primary:#5b21b6}
+
+
+/* Qalam Teacher UI v2 — presentation-only redesign, preserving Tutor runtime markup. */
+body.qalam-ui-v2{--qalam-primary:#5b21b6;--qalam-primary-2:#6d28d9;--qalam-soft:#f5f3ff;--qalam-soft-2:#ede9fe;--qalam-line:#e8e2f3;--qalam-shadow:0 10px 28px rgba(55,36,91,.08);--qalam-shadow-sm:0 5px 16px rgba(55,36,91,.07)}
+body.qalam-ui-v2 .tutor-admin-wrap,body.qalam-ui-v2 .tutor-wrap{font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:#241b35}
+body.qalam-ui-v2 .tutor-admin-container{background:linear-gradient(180deg,#fbfaff 0,#f7f5fb 100%);border-radius:22px;margin-top:12px;padding-inline:14px;box-sizing:border-box}
+body.qalam-ui-v2 .tutor-admin-header{background:rgba(255,255,255,.94)!important;border:1px solid var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important;padding:14px 18px!important;margin:12px 0!important;backdrop-filter:blur(8px)}
+body.qalam-ui-v2 .tutor-option-tabs{background:#fff;border:1px solid var(--qalam-line);border-radius:18px;padding:8px;box-shadow:var(--qalam-shadow-sm)}
+body.qalam-ui-v2 .tutor-option-tabs .tutor-nav-link{border-radius:12px!important;min-height:44px;transition:.18s ease;color:#5d556a!important}
+body.qalam-ui-v2 .tutor-option-tabs .tutor-nav-link:hover{background:#faf7ff!important;color:var(--qalam-primary)!important;transform:translateX(-2px)}
+body.qalam-ui-v2 .tutor-option-tabs .tutor-nav-link.is-active{background:linear-gradient(135deg,#ecfdf5,#ede9fe)!important;color:var(--qalam-primary)!important;font-weight:700;box-shadow:inset -3px 0 0 var(--qalam-primary)}
+body.qalam-ui-v2 .tutor-option-submenu-nav{border-inline-start:1px dashed #d8cceb;margin-inline-start:18px;padding-inline-start:8px}
+body.qalam-ui-v2 .tutor-option-nav-page>div,body.qalam-ui-v2 .tutor-option-nav-page .tutor-option-field-row{background:#fff;border:1px solid var(--qalam-line);border-radius:16px;box-shadow:0 4px 14px rgba(55,36,91,.04)}
+body.qalam-ui-v2 .tutor-option-field-row{padding:18px 20px!important;margin-bottom:12px!important;transition:border-color .18s,box-shadow .18s,transform .18s}
+body.qalam-ui-v2 .tutor-option-field-row:hover{border-color:#d7c8ef;box-shadow:var(--qalam-shadow-sm);transform:translateY(-1px)}
+body.qalam-ui-v2 .tutor-option-field-label label,body.qalam-ui-v2 [tutor-option-name]{font-weight:700!important;color:#2f2441!important;font-size:14px!important}
+body.qalam-ui-v2 .tutor-option-field-label .desc,body.qalam-ui-v2 .tutor-color-muted{color:#777080!important;line-height:1.75!important}
+body.qalam-ui-v2 .tutor-form-control,body.qalam-ui-v2 select,body.qalam-ui-v2 input[type="text"],body.qalam-ui-v2 input[type="search"],body.qalam-ui-v2 input[type="number"],body.qalam-ui-v2 input[type="email"],body.qalam-ui-v2 input[type="password"],body.qalam-ui-v2 textarea{border:1px solid #ded6ea!important;border-radius:12px!important;background:#fff!important;min-height:42px;box-shadow:0 1px 2px rgba(31,20,50,.02);transition:.18s ease}
+body.qalam-ui-v2 .tutor-form-control:focus,body.qalam-ui-v2 select:focus,body.qalam-ui-v2 input:focus,body.qalam-ui-v2 textarea:focus{border-color:#9f7aea!important;box-shadow:0 0 0 3px rgba(109,40,217,.10)!important;outline:none!important}
+body.qalam-ui-v2 .tutor-btn{border-radius:13px!important;min-height:42px!important;padding-inline:18px!important;font-weight:700!important;letter-spacing:0!important;box-shadow:none!important;transition:transform .16s ease,box-shadow .16s ease,background .16s ease!important}
+body.qalam-ui-v2 .tutor-btn:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(109,40,217,.16)!important}
+body.qalam-ui-v2 .tutor-btn-primary{background:linear-gradient(135deg,#5b21b6,#6d28d9)!important;border:0!important;color:#fff!important}
+body.qalam-ui-v2 .tutor-btn-secondary,body.qalam-ui-v2 .tutor-btn-outline-primary{background:#fff!important;border:1px solid #cdbbea!important;color:#5b21b6!important}
+body.qalam-ui-v2 .tutor-iconic-btn{border-radius:11px!important;transition:.15s ease}
+body.qalam-ui-v2 .tutor-iconic-btn:hover{background:#ecfdf5!important;color:#5b21b6!important}
+body.qalam-ui-v2 .tutor-card,body.qalam-ui-v2 .tutor-table-responsive,body.qalam-ui-v2 .tutor-announcement-big-icon+div,body.qalam-ui-v2 [class*="tutor-card"]{border-color:var(--qalam-line)!important;border-radius:18px!important;box-shadow:var(--qalam-shadow-sm)!important;background:#fff!important}
+body.qalam-ui-v2 table{border-collapse:separate!important;border-spacing:0 7px!important}
+body.qalam-ui-v2 .tutor-table tr{background:#fff}
+body.qalam-ui-v2 .tutor-table td,body.qalam-ui-v2 .tutor-table th{border-color:#eee9f5!important}
+body.qalam-ui-v2 .tutor-admin-wrap h1,body.qalam-ui-v2 .tutor-admin-wrap h2,body.qalam-ui-v2 .tutor-admin-wrap h3{color:#241b35;letter-spacing:-.2px}
+body.qalam-ui-v2 .tutor-admin-wrap .tutor-fs-4{font-weight:800!important}
+body.qalam-ui-v2 .tutor-form-toggle input:checked+span,body.qalam-ui-v2 .tutor-form-check-input:checked{background-color:#5b21b6!important;border-color:#5b21b6!important}
+body.qalam-ui-v2 .tutor-update-available{display:none!important}
+body.qalam-ui-v2 .qalam-release-page{max-width:1050px;margin:22px auto!important}
+.qalam-release-hero{display:flex;gap:22px;align-items:center;background:linear-gradient(135deg,#fff,#f5f3ff);border:1px solid #e5dbf3;border-radius:24px;padding:28px;box-shadow:var(--qalam-shadow)}
+.qalam-release-hero img{width:74px;height:74px;object-fit:contain}.qalam-release-kicker{display:inline-block;color:#5b21b6;background:#ecfdf5;padding:5px 10px;border-radius:999px;font-weight:800}.qalam-release-hero h1{margin:8px 0 5px;font-size:30px}.qalam-release-hero p{margin:0;color:#6f6878;line-height:1.8}
+.qalam-release-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}.qalam-release-card{background:#fff;border:1px solid #e8e2f3;border-radius:20px;padding:22px;box-shadow:var(--qalam-shadow-sm)}.qalam-release-card h2{margin-top:0}.qalam-release-card li,.qalam-release-card p{line-height:1.9;color:#5f586a}
+body.qalam-ui-v2 .tutor-whats-new-wrapper svg path[fill="#2563EB"]{fill:#5b21b6!important}
+body.qalam-ui-v2 img[src*="tutor-logo"],body.qalam-ui-v2 img[src*="tutor-plugin"]{object-fit:contain}
+/* Add-ons marketplace cards */
+body.qalam-ui-v2 [class*="addon"] .tutor-card,body.qalam-ui-v2 .tutor-addon-card{border-radius:18px!important;border:1px solid #e7dff1!important;box-shadow:var(--qalam-shadow-sm)!important;overflow:hidden}
+body.qalam-ui-v2 [class*="addon"] .tutor-card:hover,body.qalam-ui-v2 .tutor-addon-card:hover{border-color:#ccb9e9!important;box-shadow:var(--qalam-shadow)!important;transform:translateY(-2px)}
+@media(max-width:782px){.qalam-release-grid{grid-template-columns:1fr}.qalam-release-hero{align-items:flex-start;padding:20px}.qalam-release-hero img{width:56px;height:56px}body.qalam-ui-v2 .tutor-admin-container{padding-inline:6px}body.qalam-ui-v2 .tutor-option-field-row{padding:14px!important}}

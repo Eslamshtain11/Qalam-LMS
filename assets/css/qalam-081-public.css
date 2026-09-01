@@ -1,0 +1,63 @@
+/* Qalam 0.8.1 public exam shell — deliberately high contrast and independent of Tutor dark/spotlight skins. */
+:root{--qalam-exam-bg:#f7f7fb;--qalam-exam-surface:#fff;--qalam-exam-text:#1d1726;--qalam-exam-muted:#6b6476;--qalam-exam-border:#e7e2ee;--qalam-exam-primary:#5b21b6;--qalam-exam-primary-2:#6d28d9;--qalam-exam-soft:#f3efff;--qalam-exam-success:#137a4b;--qalam-exam-danger:#b42318}
+body.qalam-public-exam-gate{margin:0!important;background:linear-gradient(145deg,#fbfbfd 0%,#f3effb 100%)!important;font-family:"Segoe UI",Tahoma,Arial,sans-serif!important;color:var(--qalam-exam-text)!important}
+.qalam-gate-shell{min-height:100vh;display:grid;place-items:center;padding:24px}.qalam-gate-card{width:min(560px,100%);box-sizing:border-box;background:#fff;border:1px solid var(--qalam-exam-border);border-radius:26px;box-shadow:0 24px 72px rgba(49,32,68,.12);padding:34px}.qalam-gate-badge{display:inline-flex;padding:7px 12px;border-radius:999px;background:var(--qalam-exam-soft);color:var(--qalam-exam-primary);font-weight:800}.qalam-gate-card h1{font-size:30px;line-height:1.35;margin:16px 0 8px;color:var(--qalam-exam-text)}.qalam-gate-card p{color:var(--qalam-exam-muted);line-height:1.8}.qalam-gate-card form{display:grid;gap:14px;margin-top:22px}.qalam-gate-card label{display:grid;gap:7px;font-weight:700;color:var(--qalam-exam-text)}.qalam-gate-card input{box-sizing:border-box;width:100%;height:50px;border:1px solid #dcd5e8;border-radius:13px;padding:0 14px;font-size:16px;color:var(--qalam-exam-text);background:#fff}.qalam-gate-card input:focus{outline:3px solid #eee7ff;border-color:var(--qalam-exam-primary-2)}.qalam-gate-card button{border:0;border-radius:14px;padding:14px 18px;background:linear-gradient(135deg,var(--qalam-exam-primary),#7c3aed);color:#fff;font-weight:800;font-size:16px;cursor:pointer}.qalam-gate-error{padding:11px 13px;border-radius:12px;background:#fff1f2;border:1px solid #fecdd3;color:#9f1239}
+
+/* Kill inherited course/spotlight chrome for standalone/public exams. */
+body.qalam-public-quiz,body.qalam-public-quiz #page,body.qalam-public-quiz #content,body.qalam-public-quiz .site,body.qalam-public-quiz .tutor-wrap,body.qalam-public-quiz .tutor-course-single-content-wrapper,body.qalam-public-quiz #tutor-single-entry-content,body.qalam-public-quiz .tutor-quiz-single-entry-wrap,body.qalam-public-quiz .tutor-quiz-single-wrap,body.qalam-public-quiz .tutor-quiz-wrap,body.qalam-public-quiz .tutor-quiz-content{background:var(--qalam-exam-bg)!important;color:var(--qalam-exam-text)!important}
+body.qalam-public-quiz .tutor-course-single-sidebar-wrapper,body.qalam-public-quiz .tutor-course-single-sidebar,body.qalam-public-quiz .tutor-course-single-header,body.qalam-public-quiz .tutor-course-topic-single-header,body.qalam-public-quiz .tutor-spotlight-mobile-progress-complete{display:none!important}
+body.qalam-public-quiz .tutor-course-single-content-wrapper{display:block!important;min-height:100vh!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important}
+body.qalam-public-quiz #tutor-single-entry-content,body.qalam-public-quiz .tutor-quiz-single-entry-wrap{width:100%!important;max-width:none!important;margin:0!important;padding:36px 20px 72px!important;box-sizing:border-box!important}
+body.qalam-public-quiz .tutor-quiz-single-wrap{width:min(1080px,100%)!important;margin:0 auto!important;padding:0!important}
+
+/* Start page */
+body.qalam-public-quiz .tutor-start-quiz-wrapper{background:#fff!important;color:var(--qalam-exam-text)!important;border:1px solid var(--qalam-exam-border)!important;border-radius:24px!important;box-shadow:0 16px 45px rgba(48,35,67,.08)!important;padding:32px!important}
+body.qalam-public-quiz .tutor-start-quiz-wrapper *,body.qalam-public-quiz .tutor-quiz-info-area *,body.qalam-public-quiz .tutor-start-quiz-title *{text-shadow:none!important}
+body.qalam-public-quiz .tutor-start-quiz-title .tutor-color-black,body.qalam-public-quiz .tutor-quiz-info .tutor-color-black{color:var(--qalam-exam-text)!important}
+body.qalam-public-quiz .tutor-start-quiz-title .tutor-color-muted,body.qalam-public-quiz .tutor-quiz-info .tutor-color-muted{color:var(--qalam-exam-muted)!important}
+body.qalam-public-quiz .tutor-quiz-info-area{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important;gap:12px!important;margin:22px 0 30px!important}
+body.qalam-public-quiz .tutor-quiz-info{background:#faf9fc!important;border:1px solid var(--qalam-exam-border)!important;border-radius:14px!important;padding:14px!important;color:var(--qalam-exam-text)!important}
+
+/* Attempt shell and meta. */
+body.qalam-public-quiz .tutor-quiz-wrap{border:0!important;box-shadow:none!important}
+body.qalam-public-quiz .tutor-quiz-question-meta,body.qalam-public-quiz .quiz-meta-info,body.qalam-public-quiz .quiz-meta-info ul,body.qalam-public-quiz .tutor-quiz-meta{background:#fff!important;color:var(--qalam-exam-text)!important;border:1px solid var(--qalam-exam-border)!important;border-radius:18px!important;box-shadow:none!important}
+body.qalam-public-quiz .tutor-quiz-question-meta *,body.qalam-public-quiz .quiz-meta-info *{color:var(--qalam-exam-text)!important}
+
+/* Question container: exact classic + v3 selectors. */
+body.qalam-public-quiz #tutor-quiz-attempt-questions-wrap,body.qalam-public-quiz .tutor-quiz-questions,body.qalam-public-quiz .tutor-quiz-question-wrapper,body.qalam-public-quiz .quiz-question{background:transparent!important;color:var(--qalam-exam-text)!important}
+body.qalam-public-quiz .quiz-attempt-single-question,body.qalam-public-quiz .tutor-quiz-question-wrapper{box-sizing:border-box!important;width:100%!important;max-width:1000px!important;min-height:0!important;margin:22px auto!important;padding:30px!important;border:1px solid var(--qalam-exam-border)!important;border-radius:22px!important;background:#fff!important;color:var(--qalam-exam-text)!important;box-shadow:0 14px 42px rgba(47,35,63,.07)!important;overflow:visible!important}
+body.qalam-public-quiz .quiz-question{margin:0!important;padding:0!important;max-width:none!important}
+body.qalam-public-quiz .quiz-question-title,body.qalam-public-quiz .quiz-question-title *,body.qalam-public-quiz .tutor-quiz-question-title,body.qalam-public-quiz .tutor-quiz-question-title *{color:#17111f!important;font-weight:750!important;line-height:1.8!important;text-shadow:none!important}
+body.qalam-public-quiz .matching-quiz-question-desc,body.qalam-public-quiz .matching-quiz-question-desc *,body.qalam-public-quiz .question-marks,body.qalam-public-quiz .tutor-color-secondary,body.qalam-public-quiz .tutor-color-muted{color:var(--qalam-exam-muted)!important;text-shadow:none!important}
+
+/* Answer choices */
+body.qalam-public-quiz .quiz-question-ans-choice-area,body.qalam-public-quiz .quiz-question-ans-choice,body.qalam-public-quiz .tutor-quiz-question-options,body.qalam-public-quiz .tutor-quiz-question-option,body.qalam-public-quiz .tutor-quiz-question-item{color:var(--qalam-exam-text)!important;background:#fff!important;border-color:#ddd6e8!important;text-shadow:none!important}
+body.qalam-public-quiz .tutor-quiz-question-item,body.qalam-public-quiz .quiz-question-ans-choice{border:1px solid #e2dce9!important;border-radius:14px!important;padding:14px 16px!important;margin:9px 0!important;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease!important}
+body.qalam-public-quiz label.tutor-quiz-question-item:hover,body.qalam-public-quiz .quiz-question-ans-choice:hover{border-color:#d8b4fe!important;background:#faf8ff!important;box-shadow:0 0 0 3px #f2edff!important}
+body.qalam-public-quiz .tutor-quiz-question-item *,body.qalam-public-quiz .quiz-question-ans-choice *{color:var(--qalam-exam-text)!important}
+body.qalam-public-quiz input[type=radio],body.qalam-public-quiz input[type=checkbox]{accent-color:var(--qalam-exam-primary)!important}
+body.qalam-public-quiz textarea,body.qalam-public-quiz input[type=text],body.qalam-public-quiz input[type=number],body.qalam-public-quiz .tutor-quiz-question-input,body.qalam-public-quiz select{background:#fff!important;color:var(--qalam-exam-text)!important;border:1px solid #d8d1e4!important;border-radius:12px!important;box-shadow:none!important}
+body.qalam-public-quiz textarea:focus,body.qalam-public-quiz input:focus,body.qalam-public-quiz select:focus{border-color:var(--qalam-exam-primary-2)!important;box-shadow:0 0 0 3px #eee8ff!important;outline:0!important}
+
+/* Media must never be darkened by inherited course CSS. */
+body.qalam-public-quiz img,body.qalam-public-quiz figure img,body.qalam-public-quiz .qalam-question-source-image img{opacity:1!important;filter:none!important;mix-blend-mode:normal!important;max-width:100%!important;height:auto!important;object-fit:contain!important;background:#fff!important;border-radius:10px!important}
+body.qalam-public-quiz figure,body.qalam-public-quiz .qalam-question-source-image{background:#fff!important;border:1px solid #eee9f4!important;border-radius:14px!important;padding:10px!important;overflow:auto!important}
+
+/* Interactive types */
+body.qalam-public-quiz .tutor-scale-container,body.qalam-public-quiz .tutor-scale,body.qalam-public-quiz [class*=scale]{color:var(--qalam-exam-text)!important}
+body.qalam-public-quiz .tutor-scale{background:#f0ebff!important;border-color:#6d28d9!important}
+body.qalam-public-quiz .tutor-scale-bubble{background:#4c1d95!important;color:#fff!important}
+body.qalam-public-quiz .tutor-draw-image-wrapper,body.qalam-public-quiz .tutor-pin-image-wrapper,body.qalam-public-quiz .tutor-puzzle-wrapper,body.qalam-public-quiz [class*=draw-image],body.qalam-public-quiz [class*=pin-image],body.qalam-public-quiz [class*=puzzle]{background:#fff!important;color:var(--qalam-exam-text)!important;border-color:#ddd5e8!important}
+
+/* Pagination/footer */
+body.qalam-public-quiz .tutor-quiz-questions-pagination{background:#fff!important;border:1px solid var(--qalam-exam-border)!important;border-radius:16px!important;padding:10px!important;margin-bottom:16px!important}
+body.qalam-public-quiz .tutor-quiz-question-paginate-item{background:#f6f3fb!important;color:#54485f!important;border:1px solid transparent!important}
+body.qalam-public-quiz .tutor-quiz-question-paginate-item:hover,body.qalam-public-quiz .tutor-quiz-question-paginate-item.active{background:var(--qalam-exam-primary)!important;color:#fff!important}
+body.qalam-public-quiz .tutor-quiz-btn-group,body.qalam-public-quiz .quiz-answer-footer-bar{background:transparent!important;border:0!important;color:var(--qalam-exam-text)!important}
+body.qalam-public-quiz .tutor-btn-primary,body.qalam-public-quiz button.tutor-btn-primary,body.qalam-public-quiz .start-quiz-btn{background:linear-gradient(135deg,var(--qalam-exam-primary),#7c3aed)!important;color:#fff!important;border:0!important;border-radius:12px!important;box-shadow:0 8px 18px rgba(109,40,217,.18)!important}
+body.qalam-public-quiz .tutor-btn-outline-primary,body.qalam-public-quiz .tutor-btn-secondary,body.qalam-public-quiz .tutor-btn-ghost,body.qalam-public-quiz .tutor-next-btn{background:#fff!important;color:#4c1d95!important;border:1px solid #e9d5ff!important;border-radius:12px!important;opacity:1!important}
+body.qalam-public-quiz .tutor-btn:disabled{opacity:.45!important;cursor:not-allowed!important}
+body.qalam-public-quiz .tutor-quiz-question-number,body.qalam-public-quiz .tutor-quiz-question-counter{color:#4c1d95!important;font-weight:800!important}
+body.qalam-public-quiz .answer-help-block,body.qalam-public-quiz .tutor-quiz-questions-error{color:var(--qalam-exam-danger)!important}
+
+@media(max-width:767px){.qalam-gate-card{padding:22px;border-radius:20px}body.qalam-public-quiz #tutor-single-entry-content,body.qalam-public-quiz .tutor-quiz-single-entry-wrap{padding:16px 10px 48px!important}body.qalam-public-quiz .tutor-start-quiz-wrapper{padding:20px!important;border-radius:18px!important}body.qalam-public-quiz .quiz-attempt-single-question,body.qalam-public-quiz .tutor-quiz-question-wrapper{padding:18px!important;border-radius:17px!important}body.qalam-public-quiz .tutor-quiz-info-area{grid-template-columns:1fr 1fr!important}}

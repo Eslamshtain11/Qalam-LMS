@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="Qalam LMS">
+<defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#0f766e"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>
+<rect x="2" y="4" width="40" height="40" rx="12" fill="url(#g)"/>
+<path d="M13 14h18v14c0 5-4 9-9 9s-9-4-9-9V14zm6 6v8c0 2 1 3 3 3s3-1 3-3v-8h-6z" fill="#fff"/>
+<circle cx="30" cy="32" r="4" fill="#fff"/>
+<text x="54" y="31" font-family="Arial,DejaVu Sans,sans-serif" font-size="25" font-weight="700" fill="#20143a">Qalam</text>
+<text x="135" y="31" font-family="Arial,DejaVu Sans,sans-serif" font-size="20" font-weight="500" fill="#0f766e">LMS</text>
+</svg>

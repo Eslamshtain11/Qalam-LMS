@@ -1,0 +1,24 @@
+<?php
+$root=dirname(__DIR__);$fail=array();
+$ok=static function($cond,$label)use(&$fail){if(!$cond)$fail[]=$label;};
+$read=static function($rel)use($root){$p=$root.'/'.$rel;return is_file($p)?file_get_contents($p):'';};
+$branding=$read('qalam/branding.php');
+$r070=$read('qalam/release-070.php');
+$r140=$read('qalam/release-140.php');
+$r150=$read('qalam/release-150.php');
+$r160=$read('qalam/release-160.php');
+$ui=$read('assets/js/qalam-ui.js');
+$closure=$read('assets/js/qalam-160-closure.js');
+$main=$read('qalam-lms.php');
+$ok(strpos($main,'Version: 0.32.0')!==false,'hotfix product version');
+$ok(strpos($branding,'function qalam_is_product_admin_surface')!==false,'central admin surface guard');
+$ok(strpos($branding,"is_admin() && ! qalam_is_product_admin_surface()")!==false,'branding/l10n admin guard');
+$ok(strpos($r070,"qalam_is_product_admin_surface")!==false,'070 locale scoped');
+$ok(strpos($r140,"qalam_is_product_admin_surface")!==false,'140 locale scoped');
+$ok(strpos($r150,"qalam_is_product_admin_surface")!==false,'150 admin CSS scoped');
+$ok(strpos($r160,"qalam_is_product_admin_surface")!==false,'160 observer assets scoped');
+$ok(strpos($ui,"const u=(location.pathname||'')+(location.search||'')+(location.hash||'')")!==false,'UI matching excludes hostname');
+$ok(strpos($ui,'function isProductSurface()')!==false && strpos($ui,'if(!mark())return')!==false,'UI observer only starts on product surfaces');
+$ok(strpos($closure,'function isProductSurface()')!==false && strpos($closure,'if(!isProductSurface())return')!==false,'closure observer no-op off product surfaces');
+$ok(strpos($branding,"'user-new.php'")===false,'guard is allowlist-based not fragile user-page blocklist');
+if($fail){fwrite(STDERR,"FAIL qalam-221-admin-isolation-contracts\n - ".implode("\n - ",array_unique($fail))."\n");exit(1);}echo "PASS qalam-221-admin-isolation-contracts (native WordPress admin isolated from Qalam UI runtime)\n";

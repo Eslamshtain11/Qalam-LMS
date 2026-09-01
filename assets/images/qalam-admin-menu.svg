@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" role="img" aria-label="Qalam">
+  <g transform="translate(2.5 2.5) scale(.75)">
+    <rect x="1.5" y="1.5" width="17" height="17" rx="5" fill="#a7aaad"/>
+    <path d="M6 5.4h8v5.2c0 2.8-1.7 4.7-4 4.7s-4-1.9-4-4.7V5.4zm2.5 2.4v2.8c0 1.5.5 2.2 1.5 2.2s1.5-.7 1.5-2.2V7.8h-3z" fill="#1d2327"/>
+    <circle cx="13.6" cy="14" r="1.4" fill="#1d2327"/>
+  </g>
+</svg>

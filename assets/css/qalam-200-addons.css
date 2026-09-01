@@ -1,0 +1,84 @@
+/* Qalam LMS 0.20.1 — compact, product-grade add-on catalog. */
+.qalam-200-wrap{max-width:1320px}
+.qalam-200-hero{padding:24px 26px;margin-bottom:16px;align-items:center}
+.qalam-200-hero h1{font-size:28px;margin-block:4px 6px}
+.qalam-200-hero p{font-size:13px;line-height:1.75}
+.qalam-200-wrap .qalam-180-stats{gap:8px}
+.qalam-200-wrap .qalam-180-stats>div{min-width:104px;padding:12px 14px;border-radius:15px;box-shadow:none}
+.qalam-200-wrap .qalam-180-stats strong{font-size:23px;line-height:1.15}
+.qalam-200-wrap .qalam-180-stats span{font-size:10px}
+
+.qalam-200-wrap .qalam-180-toolbar{position:sticky;top:32px;z-index:40;display:grid;grid-template-columns:minmax(240px,1.35fr) minmax(170px,.75fr) auto;gap:9px;margin:0 0 18px;padding:9px;background:rgba(248,247,251,.94);border:1px solid #e9e3ef;border-radius:14px;backdrop-filter:blur(12px);box-shadow:0 6px 18px rgba(42,26,56,.035)}
+.qalam-200-wrap .qalam-050-search,.qalam-200-wrap .qalam-180-toolbar select{width:100%;min-height:39px!important;height:39px!important;border-radius:10px!important;border-color:#ddd5e5!important;font-size:12px!important;background:#fff!important;box-shadow:none!important}
+.qalam-200-wrap .qalam-200-toolbar-hint{align-self:center;color:#8b8191;font-size:10.5px;white-space:nowrap}
+
+.qalam-200-wrap .qalam-180-section{margin-top:20px}
+.qalam-200-wrap .qalam-050-section-head{margin:0 0 10px;padding-inline:2px}
+.qalam-200-wrap .qalam-050-section-head h2{font-size:18px;margin-bottom:2px;color:#261832}
+.qalam-200-wrap .qalam-050-section-head p{font-size:10.5px;color:#918696}
+.qalam-200-grid{align-items:stretch;gap:12px}
+
+.qalam-200-card{position:relative;min-height:218px!important;padding:15px!important;border-radius:16px!important;border-color:#e9e3ef!important;box-shadow:0 4px 14px rgba(45,29,61,.035)!important;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.qalam-200-card:hover{border-color:#d7c8e8!important;box-shadow:0 8px 22px rgba(59,34,82,.065)!important;transform:translateY(-1px)}
+.qalam-200-card.is-locked{background:#fcfbfd!important;border-style:solid!important;opacity:.92}
+.qalam-200-card .qalam-addon-top{align-items:flex-start;min-height:46px}
+.qalam-200-product-icon{width:48px;height:48px;border-radius:13px;padding:5px;background:#fff;box-shadow:0 4px 13px rgba(52,36,75,.055);border:1px solid #eee8f5;overflow:hidden}
+.qalam-200-product-icon img{width:100%;height:100%;display:block;object-fit:contain}
+.qalam-200-card .qalam-addon-status{margin-inline-start:auto;padding:4px 8px;font-size:9px;font-weight:700;line-height:1.2;border:1px solid transparent}
+.qalam-200-card .qalam-addon-status.is-enabled{background:#edf9f2;color:#14733a;border-color:#d9f0e2}
+.qalam-200-card .qalam-addon-status.is-disabled{background:#f5f4f6;color:#736b79;border-color:#ebe8ed}
+.qalam-200-card .qalam-addon-status.is-dependency{background:#fff8e8;color:#846113;border-color:#f6e8bf}
+.qalam-200-card .qalam-addon-status.is-locked{background:#f4eff8;color:#675470;border-color:#e8deee}
+.qalam-200-card h3{font-size:15px;line-height:1.45;margin:10px 0 4px;color:#25182f;font-weight:700}
+.qalam-200-card>p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:36px!important;max-height:36px;margin:0 0 9px!important;color:#786d80!important;font-size:11px!important;line-height:1.65!important;flex:0 0 auto!important}
+.qalam-200-card .qalam-addon-note{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:0 0 7px;padding:7px 9px;border-radius:8px;font-size:10px;line-height:1.55}
+.qalam-200-card .qalam-addon-note.is-locked{background:#f6f2f9;color:#604d74}
+.qalam-200-card .qalam-180-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:auto;padding-top:10px;border-top:1px solid #f0ebf3}
+.qalam-200-card .qalam-180-actions .button{width:100%;min-width:0!important;min-height:35px!important;height:35px!important;display:inline-flex!important;align-items:center;justify-content:center;border-radius:9px!important;padding:0 11px!important;font-size:11px!important;font-weight:700!important;line-height:1!important;box-shadow:none!important;transition:.14s ease}
+.qalam-200-card .qalam-180-actions .button:last-child{background:#6d28d9!important;border-color:#6d28d9!important;color:#fff!important}
+.qalam-200-card .qalam-180-actions .button:last-child:hover{background:#5b21b6!important;border-color:#5b21b6!important}
+.qalam-200-card .qalam-180-actions .button:first-child:not(:last-child){background:#fff!important;border-color:#ddd4e5!important;color:#695b72!important}
+.qalam-200-card .qalam-180-actions .button:first-child:not(:last-child):hover{border-color:#c7b5d8!important;color:#4d3a59!important;background:#faf8fc!important}
+.qalam-200-card .qalam-180-actions .button.button-primary:only-child{background:#6d28d9!important;border-color:#6d28d9!important;color:#fff!important}
+.qalam-200-card .qalam-180-actions .button:disabled{opacity:.5!important;cursor:not-allowed!important}
+.qalam-200-wrap .qalam-180-key{display:none!important}
+
+@media(max-width:1100px){
+  .qalam-200-wrap .qalam-180-toolbar{grid-template-columns:1fr 220px}
+  .qalam-200-wrap .qalam-200-toolbar-hint{display:none}
+  .qalam-200-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+@media(max-width:720px){
+  .qalam-200-wrap{padding:0 8px!important;margin-top:12px!important}
+  .qalam-200-hero{padding:14px 15px!important;margin-bottom:10px!important;border-radius:16px!important;gap:10px!important}
+  .qalam-200-hero .qalam-050-eyebrow{padding:3px 7px;font-size:9px}
+  .qalam-200-hero h1{font-size:21px!important;margin:2px 0 3px!important}
+  .qalam-200-hero p{font-size:10.5px!important;line-height:1.55!important}
+  .qalam-200-wrap .qalam-180-stats{width:100%;grid-template-columns:1fr 1fr!important;gap:6px!important}
+  .qalam-200-wrap .qalam-180-stats>div{min-width:0!important;min-height:54px;padding:7px 8px!important;border-radius:11px!important}
+  .qalam-200-wrap .qalam-180-stats strong{font-size:18px!important}
+  .qalam-200-wrap .qalam-180-stats span{font-size:8.5px!important;margin-top:1px}
+  .qalam-200-wrap .qalam-180-toolbar{top:46px;grid-template-columns:minmax(0,1.35fr) minmax(100px,.8fr)!important;gap:6px!important;margin-bottom:14px!important;padding:6px!important;border-radius:11px!important}
+  .qalam-200-wrap .qalam-050-search,.qalam-200-wrap .qalam-180-toolbar select{min-height:36px!important;height:36px!important;font-size:10.5px!important;padding-inline:9px!important}
+  .qalam-200-wrap .qalam-180-section{margin-top:16px!important}
+  .qalam-200-wrap .qalam-050-section-head{margin-bottom:7px!important;align-items:center!important;flex-direction:row!important}
+  .qalam-200-wrap .qalam-050-section-head h2{font-size:15px!important;margin:0 0 1px!important}
+  .qalam-200-wrap .qalam-050-section-head p{font-size:8.5px!important}
+  .qalam-200-grid{grid-template-columns:1fr!important;gap:8px!important}
+  .qalam-200-card{min-height:0!important;padding:12px!important;border-radius:14px!important;transform:none!important}
+  .qalam-200-card:hover{transform:none!important}
+  .qalam-200-card .qalam-addon-top{min-height:40px!important}
+  .qalam-200-product-icon{width:42px;height:42px;padding:4px;border-radius:11px;box-shadow:0 3px 9px rgba(52,36,75,.045)}
+  .qalam-200-card .qalam-addon-status{padding:3px 7px;font-size:8px}
+  .qalam-200-card h3{font-size:13px!important;margin:7px 0 2px!important}
+  .qalam-200-card>p{min-height:29px!important;max-height:29px!important;font-size:9.5px!important;line-height:1.5!important;margin-bottom:6px!important}
+  .qalam-200-card .qalam-addon-note{font-size:8.7px!important;padding:5px 7px!important;margin-bottom:5px!important;line-height:1.45!important}
+  .qalam-200-card .qalam-180-actions{gap:6px!important;padding-top:7px!important}
+  .qalam-200-card .qalam-180-actions .button{min-height:32px!important;height:32px!important;border-radius:8px!important;font-size:10px!important;padding:0 8px!important}
+}
+
+@media(max-width:390px){
+  .qalam-200-wrap .qalam-180-toolbar{grid-template-columns:1fr!important}
+  .qalam-200-hero p{display:none}
+}

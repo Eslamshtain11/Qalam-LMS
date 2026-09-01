@@ -1,0 +1,264 @@
+/* Qalam LMS 0.9.0 — unified responsive design system.
+   Loaded last. Scoped to Qalam/Tutor surfaces to avoid theme-wide regressions. */
+:root{
+  --qalam-primary:#5b21b6;
+  --qalam-primary-hover:#4c1d95;
+  --qalam-primary-soft:#ecfdf5;
+  --qalam-bg:#f7f7fb;
+  --qalam-surface:#ffffff;
+  --qalam-surface-2:#faf9fc;
+  --qalam-text:#17131f;
+  --qalam-text-2:#574f63;
+  --qalam-text-3:#756e80;
+  --qalam-border:#e6e1ec;
+  --qalam-border-strong:#d2c9de;
+  --qalam-success:#087f5b;
+  --qalam-warning:#a15c00;
+  --qalam-danger:#b42318;
+  --qalam-focus:#6d28d9;
+  --qalam-radius:16px;
+  --qalam-shadow:0 10px 28px rgba(36,24,50,.07);
+}
+.qalam-responsive-ui,
+.qalam-admin-shell{color:var(--qalam-text);font-family:inherit;line-height:1.65}
+.qalam-responsive-ui *,
+.qalam-admin-shell *{box-sizing:border-box}
+.qalam-responsive-ui img,
+.qalam-responsive-ui video,
+.qalam-responsive-ui iframe,
+.qalam-admin-shell img{max-width:100%}
+.qalam-responsive-ui :focus-visible,
+.qalam-admin-shell :focus-visible{outline:3px solid rgba(124,58,237,.28)!important;outline-offset:2px!important}
+
+/* ---------- Quiz: normalize both v4 learning-area and legacy/classic renderers ---------- */
+.qalam-responsive-ui .tutor-quiz-submission,
+.qalam-responsive-ui .tutor-quiz,
+.qalam-responsive-ui .tutor-course-single-content-wrapper,
+.qalam-responsive-ui .quiz-attempt-single-question{
+  --tutor-color-primary:var(--qalam-primary);
+  --tutor-color-primary-hover:var(--qalam-primary-hover);
+  color:var(--qalam-text)!important;
+}
+.qalam-responsive-ui .tutor-quiz-submission,
+.qalam-responsive-ui .tutor-quiz-body,
+.qalam-responsive-ui .tutor-course-single-content-wrapper,
+.qalam-responsive-ui .tutor-learning-area{background:var(--qalam-bg)!important;color:var(--qalam-text)!important}
+
+/* Legacy question card was left dark by previous skins: force one coherent light card. */
+.qalam-responsive-ui .quiz-attempt-single-question,
+.qalam-responsive-ui .quiz-attempt-single-question .quiz-question,
+.qalam-responsive-ui .tutor-quiz-question,
+.qalam-responsive-ui .tutor-quiz-question-wrapper{
+  background:var(--qalam-surface)!important;
+  color:var(--qalam-text)!important;
+  border:1px solid var(--qalam-border)!important;
+  border-radius:20px!important;
+  box-shadow:var(--qalam-shadow)!important;
+}
+.qalam-responsive-ui .quiz-attempt-single-question{padding:24px!important;margin-inline:auto!important;max-width:920px!important}
+.qalam-responsive-ui .quiz-attempt-single-question .quiz-question{padding:0!important;border:0!important;box-shadow:none!important}
+.qalam-responsive-ui .quiz-question-title,
+.qalam-responsive-ui .quiz-question-title *,
+.qalam-responsive-ui .tutor-quiz-question-title,
+.qalam-responsive-ui .tutor-quiz-question-title *,
+.qalam-responsive-ui .tutor-quiz-question-description,
+.qalam-responsive-ui .tutor-quiz-question-description *{
+  color:var(--qalam-text)!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+.qalam-responsive-ui .quiz-question-title,
+.qalam-responsive-ui .tutor-quiz-question-title{font-size:clamp(18px,2vw,24px)!important;font-weight:800!important;line-height:1.8!important;margin-bottom:18px!important}
+
+/* Question counter/progress */
+.qalam-responsive-ui .tutor-quiz-question-index,
+.qalam-responsive-ui .tutor-quiz-question-indicator,
+.qalam-responsive-ui .quiz-question-no,
+.qalam-responsive-ui [class*="quiz-question-number"]{color:var(--qalam-primary)!important;font-weight:800!important}
+.qalam-responsive-ui .tutor-progress-bar,
+.qalam-responsive-ui [class*="quiz-progress"]{background:#ebe7f0!important;border-radius:999px!important;overflow:hidden!important}
+.qalam-responsive-ui .tutor-progress-value,
+.qalam-responsive-ui [class*="quiz-progress"]>span{background:linear-gradient(90deg,var(--qalam-primary),#7c3aed)!important}
+
+/* Choice options: make whole row tappable and high-contrast. */
+.qalam-responsive-ui .quiz-question-ans-choice-area{margin-top:18px!important;color:var(--qalam-text)!important}
+.qalam-responsive-ui .quiz-question-ans-choice-area .tutor-row{margin-inline:-6px!important}
+.qalam-responsive-ui .quiz-question-ans-choice-area .tutor-quiz-answer-single{padding-inline:6px!important;margin-bottom:12px!important}
+.qalam-responsive-ui .quiz-question-ans-choice-area .tutor-quiz-question-item,
+.qalam-responsive-ui .tutor-quiz-question-option{
+  display:block!important;
+  width:100%!important;
+  min-height:52px!important;
+  cursor:pointer!important;
+  color:var(--qalam-text)!important;
+  background:var(--qalam-surface)!important;
+  border:1px solid var(--qalam-border-strong)!important;
+  border-radius:14px!important;
+  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease,transform .15s ease!important;
+  overflow:hidden!important;
+}
+.qalam-responsive-ui .quiz-question-ans-choice-area .tutor-card{
+  background:transparent!important;
+  color:var(--qalam-text)!important;
+  border:0!important;
+  box-shadow:none!important;
+  border-radius:14px!important;
+  min-height:52px!important;
+}
+.qalam-responsive-ui .quiz-question-ans-choice-area .tutor-quiz-question-item:hover,
+.qalam-responsive-ui .tutor-quiz-question-option:hover{border-color:#d8b4fe!important;background:#fbf9ff!important;box-shadow:0 4px 12px rgba(109,40,217,.08)!important}
+.qalam-responsive-ui .quiz-question-ans-choice-area .tutor-quiz-question-item:has(input:checked),
+.qalam-responsive-ui .tutor-quiz-question-option:has(input:checked){border-color:var(--qalam-primary)!important;background:var(--qalam-primary-soft)!important;box-shadow:0 0 0 2px rgba(109,40,217,.10)!important}
+.qalam-responsive-ui .quiz-question-ans-choice-area span,
+.qalam-responsive-ui .quiz-question-ans-choice-area label,
+.qalam-responsive-ui .tutor-quiz-question-option label,
+.qalam-responsive-ui .tutor-quiz-question-option [data-title]{color:var(--qalam-text)!important;font-size:16px!important;line-height:1.65!important}
+.qalam-responsive-ui input[type="radio"],
+.qalam-responsive-ui input[type="checkbox"]{accent-color:var(--qalam-primary)}
+.qalam-responsive-ui .tutor-form-check-input,
+.qalam-responsive-ui .tutor-radio,
+.qalam-responsive-ui .tutor-checkbox{width:20px!important;height:20px!important;min-width:20px!important}
+
+/* Inputs / essays / interactive questions */
+.qalam-responsive-ui .quiz-attempt-single-question textarea,
+.qalam-responsive-ui .quiz-attempt-single-question input[type="text"],
+.qalam-responsive-ui .tutor-quiz-question textarea,
+.qalam-responsive-ui .tutor-quiz-question input[type="text"]{
+  width:100%!important;min-height:48px!important;background:#fff!important;color:var(--qalam-text)!important;border:1px solid var(--qalam-border-strong)!important;border-radius:12px!important;padding:12px 14px!important;font-size:16px!important
+}
+.qalam-responsive-ui .tutor-scale-question,
+.qalam-responsive-ui .tutor-draw-image-question,
+.qalam-responsive-ui .tutor-pin-image-question,
+.qalam-responsive-ui .tutor-puzzle-question,
+.qalam-responsive-ui .tutor-coordinates-question{
+  background:#fbfaff!important;color:var(--qalam-text)!important;border:1px solid var(--qalam-border)!important;border-radius:16px!important;padding:18px!important;max-width:100%!important
+}
+.qalam-responsive-ui .tutor-scale-question *,
+.qalam-responsive-ui .tutor-draw-image-question *,
+.qalam-responsive-ui .tutor-pin-image-question *,
+.qalam-responsive-ui .tutor-puzzle-question *,
+.qalam-responsive-ui .tutor-coordinates-question *{color:inherit}
+.qalam-responsive-ui .tutor-scale-container,.qalam-responsive-ui .tutor-scale{background:#eee8fb!important;border-color:#7c3aed!important}
+.qalam-responsive-ui .tutor-scale-bubble{background:var(--qalam-primary)!important;color:#fff!important}
+.qalam-responsive-ui .quiz-attempt-single-question img,
+.qalam-responsive-ui .tutor-quiz-question img{display:block!important;width:auto!important;max-width:100%!important;height:auto!important;max-height:65vh!important;object-fit:contain!important;margin:16px auto!important;filter:none!important;opacity:1!important;background:#fff!important;border-radius:12px!important}
+
+/* Navigation buttons */
+.qalam-responsive-ui .tutor-quiz-btn-group,
+.qalam-responsive-ui .quiz-answer-footer-bar{display:flex!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important}
+.qalam-responsive-ui .tutor-btn,
+.qalam-responsive-ui .tutor-quiz-btn-group button,
+.qalam-responsive-ui .tutor-quiz-btn-group a,
+.qalam-responsive-ui .quiz-answer-footer-bar button,
+.qalam-responsive-ui .quiz-answer-footer-bar a{min-height:48px!important;border-radius:12px!important;font-weight:800!important;text-decoration:none!important}
+.qalam-responsive-ui .tutor-btn-primary,
+.qalam-responsive-ui .tutor-quiz-btn-group .tutor-btn-primary{background:var(--qalam-primary)!important;color:#fff!important;border:1px solid var(--qalam-primary)!important;box-shadow:none!important}
+.qalam-responsive-ui .tutor-btn-primary:hover{background:var(--qalam-primary-hover)!important}
+.qalam-responsive-ui .tutor-btn-secondary,
+.qalam-responsive-ui .tutor-quiz-btn-group .tutor-btn:not(.tutor-btn-primary){background:#fff!important;color:var(--qalam-primary-hover)!important;border:1px solid #b9a5e7!important}
+
+/* Never let the floating AI assistant obscure an active quiz. JS marks the matching widget. */
+.qalam-responsive-ui .qalam-hide-during-quiz{display:none!important}
+
+/* ---------- Student/dashboard/global frontend ---------- */
+.qalam-responsive-ui .tutor-dashboard,
+.qalam-responsive-ui .tutor-dashboard-content,
+.qalam-responsive-ui .tutor-wrap{background:var(--qalam-bg);color:var(--qalam-text)}
+.qalam-responsive-ui .tutor-card,
+.qalam-responsive-ui .tutor-dashboard-content>div{max-width:100%}
+.qalam-responsive-ui .tutor-dashboard-menu-item a{min-height:44px;display:flex;align-items:center}
+.qalam-responsive-ui table{max-width:100%}
+.qalam-responsive-ui .tutor-modal-content{max-width:min(720px,calc(100vw - 24px))!important}
+
+/* ---------- Qalam/Tutor admin surfaces ---------- */
+.qalam-admin-shell #wpcontent{overflow-x:hidden}
+.qalam-admin-shell .qalam-050-wrap,
+.qalam-admin-shell .qalam-060-wrap,
+.qalam-admin-shell .qalam-081-wrap{max-width:1440px!important;margin-inline:auto!important;padding-inline:18px!important}
+.qalam-admin-shell .qalam-050-panel,
+.qalam-admin-shell .qalam-050-hero{border-radius:var(--qalam-radius)!important;background:#fff!important;border:1px solid var(--qalam-border)!important;box-shadow:var(--qalam-shadow)!important;color:var(--qalam-text)!important}
+.qalam-admin-shell .qalam-question-layout{display:grid!important;grid-template-columns:minmax(220px,280px) minmax(0,1fr)!important;gap:18px!important}
+.qalam-admin-shell .qalam-question-main{min-width:0!important}
+.qalam-admin-shell input:not([type=checkbox]):not([type=radio]),
+.qalam-admin-shell select,
+.qalam-admin-shell textarea{max-width:100%!important;min-height:42px!important}
+.qalam-admin-shell .qalam-050-table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+.qalam-admin-shell .qalam-050-table{min-width:720px}
+.qalam-admin-shell .qalam-row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.qalam-admin-shell .qalam-bank-filter-form{display:flex!important;gap:8px!important;flex-wrap:wrap!important;align-items:center!important}
+.qalam-admin-shell .qalam-bank-bulkbar{display:flex!important;gap:10px!important;flex-wrap:wrap!important;align-items:center!important}
+
+/* ---------- Mobile-first overrides ---------- */
+@media(max-width:782px){
+  html,body{max-width:100%;overflow-x:hidden}
+  .qalam-responsive-ui{font-size:16px}
+  .qalam-responsive-ui .tutor-container,.qalam-responsive-ui .tutor-container-fluid{padding-inline:12px!important}
+  .qalam-responsive-ui .quiz-attempt-single-question,
+  .qalam-responsive-ui .tutor-quiz-question-wrapper,
+  .qalam-responsive-ui .tutor-quiz-intro{width:calc(100% - 24px)!important;max-width:none!important;margin:12px auto!important;padding:16px!important;border-radius:16px!important}
+  .qalam-responsive-ui .quiz-attempt-single-question .quiz-question{padding:0!important}
+  .qalam-responsive-ui .quiz-question-title,
+  .qalam-responsive-ui .tutor-quiz-question-title{font-size:18px!important;line-height:1.75!important;text-align:right!important}
+  .qalam-responsive-ui .quiz-question-ans-choice-area .tutor-col-sm-6,
+  .qalam-responsive-ui .quiz-question-ans-choice-area [class*="tutor-col-"]{width:100%!important;flex:0 0 100%!important;max-width:100%!important}
+  .qalam-responsive-ui .quiz-question-ans-choice-area .tutor-card{padding:12px!important}
+  .qalam-responsive-ui .quiz-question-ans-choice-area span,
+  .qalam-responsive-ui .tutor-quiz-question-option label{font-size:16px!important}
+  .qalam-responsive-ui .tutor-quiz-btn-group,
+  .qalam-responsive-ui .quiz-answer-footer-bar{
+    position:sticky!important;bottom:0!important;z-index:30!important;background:rgba(255,255,255,.96)!important;backdrop-filter:blur(12px)!important;border-top:1px solid var(--qalam-border)!important;margin:24px -16px -16px!important;padding:10px 16px calc(10px + env(safe-area-inset-bottom))!important;justify-content:space-between!important
+  }
+  .qalam-responsive-ui .tutor-quiz-btn-group>* ,
+  .qalam-responsive-ui .quiz-answer-footer-bar>*{flex:1 1 120px!important;text-align:center!important;justify-content:center!important}
+  .qalam-responsive-ui .tutor-scale-question,
+  .qalam-responsive-ui .tutor-draw-image-question,
+  .qalam-responsive-ui .tutor-pin-image-question,
+  .qalam-responsive-ui .tutor-puzzle-question,
+  .qalam-responsive-ui .tutor-coordinates-question{padding:12px!important;overflow-x:auto!important}
+  .qalam-responsive-ui .tutor-draw-image-wrapper,
+  .qalam-responsive-ui .tutor-pin-image-wrapper,
+  .qalam-responsive-ui .tutor-puzzle-wrapper,
+  .qalam-responsive-ui .tutor-coordinates-grid-container{max-width:100%!important;min-width:0!important}
+  .qalam-responsive-ui .tutor-dashboard .tutor-row{margin-inline:0!important}
+  .qalam-responsive-ui .tutor-dashboard-left-menu,
+  .qalam-responsive-ui .tutor-dashboard-permalinks{width:100%!important;max-width:100%!important;overflow-x:auto!important;white-space:nowrap!important;display:flex!important;gap:6px!important;padding:8px!important;scrollbar-width:none}
+  .qalam-responsive-ui .tutor-dashboard-left-menu li,
+  .qalam-responsive-ui .tutor-dashboard-permalinks li{display:inline-flex!important;flex:0 0 auto!important;margin:0!important}
+  .qalam-responsive-ui .tutor-dashboard-content{width:100%!important;padding-inline:12px!important}
+  .qalam-responsive-ui .tutor-modal-wrap,.qalam-responsive-ui .tutor-modal{padding:0!important;align-items:flex-end!important}
+  .qalam-responsive-ui .tutor-modal-content{width:100%!important;max-width:100%!important;max-height:92dvh!important;border-radius:18px 18px 0 0!important;overflow-y:auto!important;padding-bottom:calc(16px + env(safe-area-inset-bottom))!important}
+
+  .qalam-admin-shell #wpcontent{padding-left:0!important}
+  .qalam-admin-shell .qalam-050-wrap,
+  .qalam-admin-shell .qalam-060-wrap,
+  .qalam-admin-shell .qalam-081-wrap{padding-inline:10px!important;margin:10px 0!important;width:100%!important}
+  .qalam-admin-shell .qalam-050-hero{display:flex!important;flex-direction:column!important;gap:12px!important;padding:16px!important}
+  .qalam-admin-shell .qalam-050-hero-actions{display:grid!important;grid-template-columns:1fr!important;width:100%!important;gap:8px!important}
+  .qalam-admin-shell .qalam-050-hero-actions .button{width:100%!important;min-height:44px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  .qalam-admin-shell .qalam-question-layout{grid-template-columns:1fr!important}
+  .qalam-admin-shell .qalam-question-sidebar{order:0!important;position:static!important;width:100%!important}
+  .qalam-admin-shell .qalam-question-main{order:1!important;width:100%!important}
+  .qalam-admin-shell .qalam-050-section-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important}
+  .qalam-admin-shell .qalam-bank-filter-form{display:grid!important;grid-template-columns:1fr!important;width:100%!important}
+  .qalam-admin-shell .qalam-bank-filter-form>*{width:100%!important;max-width:100%!important}
+  .qalam-admin-shell .qalam-bank-bulkbar{display:grid!important;grid-template-columns:1fr 1fr!important}
+  .qalam-admin-shell .qalam-bank-bulkbar label,
+  .qalam-admin-shell .qalam-bank-selected-count{grid-column:1/-1}
+  .qalam-admin-shell .qalam-050-form{display:grid!important;grid-template-columns:1fr!important}
+  .qalam-admin-shell .qalam-050-panel{padding:14px!important}
+  .qalam-admin-shell .qalam-question-count-grid{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .qalam-admin-shell .qalam-ai-source-grid{grid-template-columns:1fr!important}
+  .qalam-admin-shell .qalam-050-table{min-width:680px!important}
+  .qalam-admin-shell .qalam-certificate-grid{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:480px){
+  .qalam-responsive-ui .quiz-attempt-single-question,
+  .qalam-responsive-ui .tutor-quiz-question-wrapper,
+  .qalam-responsive-ui .tutor-quiz-intro{width:calc(100% - 16px)!important;margin:8px auto!important;padding:14px!important}
+  .qalam-responsive-ui .quiz-question-title,.qalam-responsive-ui .tutor-quiz-question-title{font-size:17px!important}
+  .qalam-responsive-ui .tutor-quiz-btn-group>* , .qalam-responsive-ui .quiz-answer-footer-bar>*{flex-basis:100px!important;min-height:46px!important}
+  .qalam-admin-shell .qalam-question-count-grid{grid-template-columns:1fr!important}
+  .qalam-admin-shell .qalam-certificate-grid{grid-template-columns:1fr!important}
+  .qalam-admin-shell .qalam-bank-bulkbar{grid-template-columns:1fr!important}
+  .qalam-admin-shell .qalam-bank-bulkbar>*{grid-column:1!important;width:100%!important}
+}

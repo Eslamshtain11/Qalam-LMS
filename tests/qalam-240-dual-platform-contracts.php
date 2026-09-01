@@ -1,0 +1,38 @@
+<?php
+$root=dirname(__DIR__);$fail=array();
+$ok=static function($cond,$label)use(&$fail){if(!$cond)$fail[]=$label;};
+$read=static function($rel)use($root){$p=$root.'/'.$rel;return is_file($p)?file_get_contents($p):'';};
+$main=$read('qalam-lms.php');$r240=$read('qalam/release-240.php');$r230=$read('qalam/release-230.php');$r220=$read('qalam/release-220.php');$utils=$read('classes/Utils.php');$general=$read('includes/tutor-general-functions.php');$css=$read('assets/css/qalam-reference-system.css');$studio=$read('assets/css/qalam-design-studio.css');$js=$read('assets/js/qalam-reference-system.js');
+$version='0.32.0';
+$ok(strpos($main,'Version: '.$version)!==false,'0.24 product version');
+$ok(strpos($main,"require_once __DIR__ . '/qalam/release-240.php';")!==false,'0.24 bootstrap');
+$ok(strpos($r230,"'platform_type'       => 'academy'")!==false,'academy default');
+$ok(strpos($r230,"'appearance_mode'     => 'system'")!==false,'system mode default');
+$ok(strpos($r230,"value=\"academy\"")!==false && strpos($r230,"value=\"individual\"")!==false,'design studio platform type selector');
+$ok(strpos($r230,"name=\"brand[appearance_mode]\"")!==false,'design studio appearance selector');
+foreach(array('custom_primary','custom_primary_2','custom_accent') as $key){$ok(strpos($r230,"'{$key}'")!==false,'custom token '.$key);}
+$ok(strpos($r240,'qalam_240_render_academy_home')!==false,'academy homepage renderer');
+$ok(strpos($r240,'qalam_240_render_individual_home')!==false,'individual homepage renderer');
+$ok(strpos($r240,'qalam_240_render_shell_header')!==false && strpos($r240,'qalam_240_render_shell_footer')!==false,'theme-independent global shell');
+$ok(strpos($utils,"function_exists( 'qalam_240_render_shell_header' )")!==false,'Tutor templates use Qalam header');
+$ok(strpos($utils,"function_exists( 'qalam_240_render_shell_footer' )")!==false,'Tutor templates use Qalam footer');
+$ok(strpos($general,"qalam_240_render_shell_header()")!==false && strpos($general,"qalam_240_render_shell_footer()")!==false,'lesson/quiz full-screen shell uses Qalam chrome');
+$ok(strpos($r240,"remove_action( 'template_redirect', 'qalam_230_render_public_home', 1 )")!==false,'0.23 homepage superseded');
+$ok(strpos($r240,'get_stylesheet_directory_uri')!==false && strpos($r240,'wp_dequeue_style')!==false,'active theme isolation');
+$ok(strpos($r240,'qalam_240_instructors')!==false && strpos($r240,"'tutor_instructor'")!==false,'academy instructors dynamic');
+$ok(strpos($r240,'qalam_240_course_categories')!==false,'dynamic subject/grade tracks');
+$ok(strpos($r240,"'post_type' => 'courses'")!==false,'dynamic published courses');
+$ok(strpos($r240,'teacher_image_url')!==false && strpos($r240,'logo_url')!==false,'individual identity fallback');
+$ok(substr_count($r240,'مؤسسة قلم للخدمات الإلكترونية')>=1,'mandatory Qalam company branding');
+$ok(substr_count($r240,'بكل فخر ❤️ صنع في مصر')>=1,'mandatory Made in Egypt branding');
+$ok(strpos($r220,'qalam-platform-<?php echo esc_attr')!==false,'login inherits platform type');
+$ok(strpos($r220,'data-qalam-mode-toggle')!==false,'login mode toggle');
+$ok(strpos($js,'localStorage')!==false && strpos($js,'prefers-color-scheme')!==false,'persistent light/dark mode');
+$ok(strpos($js,'IntersectionObserver')!==false,'scroll reveal animation');
+$ok(strpos($css,'.q-ref-academy-hero')!==false && strpos($css,'.q-ref-teacher-grid')!==false && strpos($css,'.q-ref-subject-grid')!==false,'academy visual system');
+$ok(strpos($css,'.q-ref-individual-hero')!==false && strpos($css,'.q-ref-personal-portrait')!==false && strpos($css,'.q-ref-honor-panel')!==false,'individual visual system');
+$ok(strpos($css,'html[data-qalam-mode=dark]')!==false,'dark mode tokens');
+$ok(strpos($css,'.q-ref-main .tutor-card')!==false && strpos($css,'.q-ref-main .tutor-btn-primary')!==false,'Tutor public surface skin');
+$ok(strpos($css,'prefers-reduced-motion')!==false,'reduced motion accessibility');
+$ok(strpos($studio,'.qalam-platform-type-list')!==false,'studio selector styling');
+if($fail){fwrite(STDERR,"FAIL qalam-240-dual-platform-contracts\n - ".implode("\n - ",array_unique($fail))."\n");exit(1);}echo "PASS qalam-240-dual-platform-contracts (academy + individual public systems + global light/dark + protected design controls)\n";

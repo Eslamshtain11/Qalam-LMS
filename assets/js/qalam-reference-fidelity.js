@@ -1,0 +1,1 @@
+(function(){'use strict';document.addEventListener('click',function(e){var b=e.target.closest('[data-q280-picker-go]');if(!b)return;var box=b.closest('.q28-picker-shell'),t=box&&box.querySelector('[data-q280-teacher-select]'),s=box&&box.querySelector('[data-q280-subject-select]'),u=(s&&s.value)||(t&&t.value);if(u){window.location.href=u;}});})();
