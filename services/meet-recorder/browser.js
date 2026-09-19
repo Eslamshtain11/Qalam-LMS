@@ -131,6 +131,41 @@ async function joinMeeting(page, url) {
     "إيقاف الكاميرا",
   ], "CAMERA");
 
+  const guestName = String(process.env.QALAM_BOT_NAME || "QALAM Recorder");
+  const guestNameFilled = await withTimeout(
+    "MEET_GUEST_NAME",
+    page.evaluate((name) => {
+      const inputs = Array.from(document.querySelectorAll("input"));
+      const input = inputs.find((el) => {
+        const type = String(el.getAttribute("type") || "text").toLowerCase();
+        const aria = String(el.getAttribute("aria-label") || "").toLowerCase();
+        const placeholder = String(el.getAttribute("placeholder") || "").toLowerCase();
+        return type === "text" ||
+          aria.includes("name") ||
+          placeholder.includes("name");
+      });
+      if (!input) return false;
+
+      const descriptor = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      );
+      if (descriptor?.set) descriptor.set.call(input, name);
+      else input.value = name;
+
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      input.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, key: "a" }));
+      return true;
+    }, guestName),
+    5000,
+  );
+
+  if (guestNameFilled) {
+    console.log(new Date().toISOString(), "MEET_GUEST_NAME_FILLED", guestName);
+    await sleep(700);
+  }
+
   const joined = await clickDomButton(page, [
     "join now",
     "الانضمام الآن",
