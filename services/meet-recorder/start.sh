@@ -56,7 +56,7 @@ chromium \
   --remote-debugging-address=127.0.0.1 \
   --remote-allow-origins=* \
   --user-data-dir=/data/chrome-profile \
-  https://myaccount.google.com/ \
+  'https://accounts.google.com/signin/v2/identifier?service=accountsettings&continue=https%3A%2F%2Fmyaccount.google.com%2F' \
   >/tmp/chromium.log 2>&1 &
 
 for i in $(seq 1 30); do
