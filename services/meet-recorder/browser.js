@@ -218,6 +218,12 @@ async function joinMeeting(page, url) {
     }),
   );
 
+  const preText = String(pre.body || "");
+  if (/what's your name\?|sign in/i.test(preText)) {
+    console.log(new Date().toISOString(), "MEET_AUTH_REQUIRED");
+    throw new Error("GOOGLE_AUTH_REQUIRED");
+  }
+
   await clickDomButton(page, [
     "turn off microphone", "mute microphone",
     "إيقاف الميكروفون", "كتم الميكروفون",
