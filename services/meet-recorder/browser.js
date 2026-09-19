@@ -17,11 +17,25 @@ async function withTimeout(label, promise, ms) {
 
 async function connectBrowser() {
   console.log(new Date().toISOString(), "BROWSER_CONNECT_START");
+
+  const version = await withTimeout(
+    "CDP_VERSION",
+    fetch("http://127.0.0.1:9222/json/version").then((r) => {
+      if (!r.ok) throw new Error("CDP_VERSION_HTTP_" + r.status);
+      return r.json();
+    }),
+    5000,
+  );
+
+  const wsUrl = String(version?.webSocketDebuggerUrl || "");
+  if (!wsUrl) throw new Error("CDP_WEBSOCKET_URL_MISSING");
+
   const browser = await withTimeout(
     "BROWSER_CONNECT",
-    chromium.connectOverCDP("http://127.0.0.1:9222"),
+    chromium.connectOverCDP(wsUrl, { timeout: 10000 }),
     12000,
   );
+
   const contexts = browser.contexts();
   if (!contexts.length) throw new Error("No browser context");
   console.log(new Date().toISOString(), "BROWSER_CONNECTED");
