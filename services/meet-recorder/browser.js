@@ -1,5 +1,9 @@
+const fs = require("fs");
+const { spawn, execFileSync } = require("child_process");
 const { chromium } = require("playwright-core");
 const { sleep } = require("./media");
+
+const CDP_HTTP = "http://127.0.0.1:9222";
 
 async function withTimeout(label, promise, ms) {
   let timer;
@@ -15,26 +19,119 @@ async function withTimeout(label, promise, ms) {
   }
 }
 
+async function fetchVersionOnce() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3500);
+  try {
+    const r = await fetch(CDP_HTTP + "/json/version", {
+      signal: controller.signal,
+      cache: "no-store",
+    });
+    if (!r.ok) throw new Error("CDP_VERSION_HTTP_" + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function waitForCdp(attempts = 8) {
+  let lastError = null;
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      const version = await fetchVersionOnce();
+      const wsUrl = String(version?.webSocketDebuggerUrl || "");
+      if (!wsUrl) throw new Error("CDP_WEBSOCKET_URL_MISSING");
+      console.log(new Date().toISOString(), "CDP_READY", "attempt=" + i);
+      return wsUrl;
+    } catch (e) {
+      lastError = e;
+      console.log(
+        new Date().toISOString(),
+        "CDP_RETRY",
+        "attempt=" + i,
+        String(e?.message || e),
+      );
+      await sleep(Math.min(1000 * i, 3500));
+    }
+  }
+  throw lastError || new Error("CDP_UNAVAILABLE");
+}
+
+function killChromium() {
+  try { execFileSync("pkill", ["-9", "-f", "chromium"], { stdio: "ignore" }); } catch {}
+  try { fs.rmSync("/data/chrome-profile/SingletonLock", { force: true }); } catch {}
+  try { fs.rmSync("/data/chrome-profile/SingletonSocket", { force: true }); } catch {}
+  try { fs.rmSync("/data/chrome-profile/SingletonCookie", { force: true }); } catch {}
+}
+
+async function restartChromium() {
+  console.log(new Date().toISOString(), "CHROMIUM_RECOVERY_START");
+  killChromium();
+  await sleep(1500);
+
+  const args = [
+    "--no-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+    "--password-store=basic",
+    "--window-position=0,0",
+    "--window-size=1280,720",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--autoplay-policy=no-user-gesture-required",
+    "--remote-debugging-port=9222",
+    "--remote-debugging-address=127.0.0.1",
+    "--user-data-dir=/data/chrome-profile",
+    "https://myaccount.google.com/",
+  ];
+
+  const proc = spawn("chromium", args, {
+    env: { ...process.env, DISPLAY: process.env.DISPLAY || ":99" },
+    detached: true,
+    stdio: ["ignore", "ignore", "ignore"],
+  });
+  proc.unref();
+
+  const wsUrl = await waitForCdp(12);
+  console.log(new Date().toISOString(), "CHROMIUM_RECOVERY_READY");
+  return wsUrl;
+}
+
 async function connectBrowser() {
   console.log(new Date().toISOString(), "BROWSER_CONNECT_START");
 
-  const version = await withTimeout(
-    "CDP_VERSION",
-    fetch("http://127.0.0.1:9222/json/version").then((r) => {
-      if (!r.ok) throw new Error("CDP_VERSION_HTTP_" + r.status);
-      return r.json();
-    }),
-    5000,
-  );
+  let wsUrl;
+  try {
+    wsUrl = await waitForCdp(5);
+  } catch (firstError) {
+    console.log(
+      new Date().toISOString(),
+      "CDP_PRIMARY_FAILED",
+      String(firstError?.message || firstError),
+    );
+    wsUrl = await restartChromium();
+  }
 
-  const wsUrl = String(version?.webSocketDebuggerUrl || "");
-  if (!wsUrl) throw new Error("CDP_WEBSOCKET_URL_MISSING");
-
-  const browser = await withTimeout(
-    "BROWSER_CONNECT",
-    chromium.connectOverCDP(wsUrl, { timeout: 10000 }),
-    12000,
-  );
+  let browser;
+  try {
+    browser = await withTimeout(
+      "BROWSER_CONNECT",
+      chromium.connectOverCDP(wsUrl, { timeout: 15000 }),
+      18000,
+    );
+  } catch (firstConnectError) {
+    console.log(
+      new Date().toISOString(),
+      "BROWSER_CONNECT_RECOVERY",
+      String(firstConnectError?.message || firstConnectError),
+    );
+    wsUrl = await restartChromium();
+    browser = await withTimeout(
+      "BROWSER_CONNECT_RETRY",
+      chromium.connectOverCDP(wsUrl, { timeout: 15000 }),
+      18000,
+    );
+  }
 
   const contexts = browser.contexts();
   if (!contexts.length) throw new Error("No browser context");
@@ -97,7 +194,7 @@ async function joinMeeting(page, url) {
   console.log(new Date().toISOString(), "MEET_NAV_START");
 
   try {
-    await page.goto(url, { waitUntil: "commit", timeout: 8000 });
+    await page.goto(url, { waitUntil: "commit", timeout: 12000 });
     console.log(new Date().toISOString(), "MEET_NAV_COMMIT");
   } catch (e) {
     console.log(new Date().toISOString(), "MEET_NAV_TIMEOUT_CONTINUE", String(e?.message || e));
@@ -185,9 +282,6 @@ async function joinMeeting(page, url) {
     throw new Error("Meet join button was not found");
   }
 
-  // Meet's active-call page can block normal DOM evaluation for long periods.
-  // Once the enabled Join button has been clicked successfully, continue via CDP recording
-  // instead of waiting on another DOM snapshot.
   await sleep(6000);
   console.log(new Date().toISOString(), "MEET_JOIN_FLOW_DONE");
   return "JOIN_CLICKED";
