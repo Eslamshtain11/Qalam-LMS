@@ -88,8 +88,29 @@ async function runJob(job) {
   }
 }
 
+async function mediaSmokeTest() {
+  const basePath = "/tmp/qalam-media-smoke";
+  const filePath = basePath + ".mp4";
+  let recording = null;
+  try {
+    recording = startRecording(basePath);
+    await sleep(4000);
+    await stopRecording(recording);
+    const result = finalizeRecording(recording, filePath);
+    log(
+      "MEDIA_SMOKE_SUCCESS",
+      "final=" + result.finalSize,
+      "video=" + result.videoSize,
+      "audio=" + result.audioSize
+    );
+  } finally {
+    cleanupRecording(recording, filePath);
+  }
+}
+
 async function loop() {
   await ensurePulse();
+  await mediaSmokeTest();
   log("QALAM_RECORDER_READY");
   log("SCHEDULE_POLLING_ENABLED");
 
