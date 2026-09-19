@@ -17,7 +17,7 @@ async function clickAny(page, labels) {
     ];
     for (const item of candidates) {
       try {
-        if (await item.first().isVisible({ timeout: 600 })) {
+        if (await item.first().isVisible({ timeout: 700 })) {
           await item.first().click({ timeout: 2500 });
           return true;
         }
@@ -28,8 +28,23 @@ async function clickAny(page, labels) {
 }
 
 async function joinMeeting(page, url) {
-  await page.goto(url, { waitUntil: "commit", timeout: 30000 });
-  await sleep(6000);
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send("Page.enable");
+    const nav = await cdp.send("Page.navigate", { url });
+    if (nav?.errorText) throw new Error("Meet navigation failed: " + nav.errorText);
+  } finally {
+    try { await cdp.detach(); } catch {}
+  }
+
+  // Do not wait for DOMContentLoaded/network-idle: Meet is a long-lived WebRTC app
+  // and those lifecycle events can stall in containerized Chromium.
+  await sleep(8000);
+
+  const currentUrl = page.url();
+  if (!currentUrl.includes("meet.google.com/")) {
+    throw new Error("Meet did not open; current URL: " + currentUrl);
+  }
 
   await clickAny(page, [
     "Turn off microphone",
@@ -56,11 +71,16 @@ async function joinMeeting(page, url) {
     try { await page.keyboard.press("Enter"); } catch {}
   }
 
-  await sleep(8000);
+  await sleep(9000);
   const text = (await page.locator("body").innerText().catch(() => "")) || "";
 
   if (/you can't join this video call|لا يمكنك الانضمام/i.test(text)) {
     throw new Error("Meeting admission denied");
+  }
+
+  if (/sign in|تسجيل الدخول/i.test(text) &&
+      !/leave call|مغادرة المكالمة|people|الأشخاص|participant|مشارك/i.test(text)) {
+    throw new Error("Google session is not authenticated");
   }
 
   return text;
