@@ -56,6 +56,7 @@ async function runJob(job) {
     const planned = maxTestSeconds > 0 ? Math.min(requested, maxTestSeconds) : requested;
     const recordSeconds = planned + GRACE_SECONDS;
 
+    await callControl("started", { runId: job.runId });
     log("RECORDING_STARTED", job.runId, recordSeconds);
     await sleep(recordSeconds * 1000);
 
