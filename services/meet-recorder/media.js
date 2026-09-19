@@ -1,46 +1,18 @@
+const fs = require("fs");
 const { spawn, execFileSync } = require("child_process");
 
 const DISPLAY = process.env.DISPLAY || ":99";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-let silenceClock = null;
-
 function exec(cmd, args = []) {
   try {
-    return execFileSync(cmd, args, { stdio: ["ignore", "pipe", "pipe"] }).toString();
+    return execFileSync(cmd, args, {
+      stdio: ["ignore", "pipe", "pipe"],
+      maxBuffer: 4 * 1024 * 1024,
+    }).toString();
   } catch {
     return "";
   }
-}
-
-function ensureSilenceClock() {
-  if (silenceClock && silenceClock.exitCode === null) return;
-
-  silenceClock = spawn(
-    "ffmpeg",
-    [
-      "-hide_banner",
-      "-loglevel", "error",
-      "-re",
-      "-f", "lavfi",
-      "-i", "anullsrc=r=48000:cl=stereo",
-      "-f", "pulse",
-      "qalamrec",
-    ],
-    {
-      env: { ...process.env, DISPLAY, PULSE_SINK: "qalamrec" },
-      stdio: ["ignore", "ignore", "pipe"],
-    }
-  );
-
-  silenceClock.stderr.on("data", (d) => {
-    const s = String(d).trim();
-    if (s) console.log(new Date().toISOString(), "SILENCE_CLOCK", s.slice(-500));
-  });
-
-  silenceClock.on("exit", (code, signal) => {
-    console.log(new Date().toISOString(), "SILENCE_CLOCK_EXIT", code, signal);
-  });
 }
 
 async function ensurePulse() {
@@ -52,19 +24,12 @@ async function ensurePulse() {
     await sleep(1200);
     info = exec("pactl", ["info"]);
   }
+  if (!info.includes("Server Name")) throw new Error("PulseAudio unavailable");
 
-  if (!info.includes("Server Name")) {
-    throw new Error("PulseAudio unavailable");
-  }
-
-  const modules = exec("pactl", ["list", "short", "modules"])
-    .split("\n")
-    .filter(Boolean);
-
+  const modules = exec("pactl", ["list", "short", "modules"]).split("\n").filter(Boolean);
   for (const line of modules) {
     if (line.includes("module-suspend-on-idle")) {
-      const id = line.split(/\s+/)[0];
-      exec("pactl", ["unload-module", id]);
+      exec("pactl", ["unload-module", line.split(/\s+/)[0]]);
     }
   }
 
@@ -74,93 +39,206 @@ async function ensurePulse() {
       "load-module",
       "module-null-sink",
       "sink_name=qalamrec",
+      "rate=48000",
+      "channels=2",
       "sink_properties=device.description=QalamRecorder",
     ]);
-    await sleep(300);
+    await sleep(400);
     sources = exec("pactl", ["list", "short", "sources"]);
   }
 
   if (!sources.includes("qalamrec.monitor")) {
-    throw new Error("Recorder audio source unavailable");
+    throw new Error("qalamrec.monitor unavailable");
   }
 
   exec("pactl", ["set-default-sink", "qalamrec"]);
   exec("pactl", ["set-sink-mute", "qalamrec", "0"]);
-
-  ensureSilenceClock();
-  await sleep(700);
 }
 
-function startRecording(filePath) {
-  const args = [
+function capturePaths(basePath) {
+  return {
+    video: basePath + ".video.mkv",
+    audio: basePath + ".audio.raw",
+  };
+}
+
+function startRecording(basePath) {
+  const paths = capturePaths(basePath);
+  for (const p of Object.values(paths)) {
+    try { fs.rmSync(p, { force: true }); } catch {}
+  }
+
+  const video = spawn("ffmpeg", [
     "-y",
-    "-loglevel", "info",
-    "-thread_queue_size", "2048",
+    "-hide_banner",
+    "-loglevel", "warning",
     "-f", "x11grab",
     "-video_size", "1280x720",
     "-framerate", "20",
     "-i", DISPLAY + ".0",
-    "-thread_queue_size", "2048",
-    "-f", "pulse",
-    "-i", "qalamrec.monitor",
-    "-map", "0:v:0",
-    "-map", "1:a:0",
+    "-an",
     "-c:v", "libx264",
     "-preset", "veryfast",
     "-crf", "28",
     "-pix_fmt", "yuv420p",
-    "-c:a", "aac",
-    "-b:a", "128k",
-    "-movflags", "+faststart",
-    filePath,
-  ];
-
-  const proc = spawn("ffmpeg", args, {
-    env: { ...process.env, DISPLAY, PULSE_SINK: "qalamrec" },
-    stdio: ["ignore", "ignore", "pipe"],
+    "-f", "matroska",
+    paths.video,
+  ], {
+    env: { ...process.env, DISPLAY },
+    stdio: ["pipe", "ignore", "pipe"],
   });
 
-  let tail = "";
-  proc.stderr.on("data", (chunk) => {
-    tail = (tail + String(chunk)).slice(-12000);
+  let videoTail = "";
+  video.stderr.on("data", (d) => {
+    videoTail = (videoTail + String(d)).slice(-6000);
+  });
+  video.on("exit", (code, signal) => {
+    console.log(new Date().toISOString(), "VIDEO_RECORDER_EXIT",
+      "code=" + code, "signal=" + signal,
+      videoTail.replace(/\n/g, " | ").slice(-1200));
   });
 
-  proc.on("error", (err) => {
-    console.log(new Date().toISOString(), "FFMPEG_PROCESS_ERROR", err.message);
+  const audioFile = fs.createWriteStream(paths.audio);
+  const audio = spawn("parec", [
+    "--device=qalamrec.monitor",
+    "--format=s16le",
+    "--rate=48000",
+    "--channels=2",
+    "--latency-msec=50",
+  ], {
+    env: { ...process.env, PULSE_SINK: "qalamrec" },
+    stdio: ["ignore", "pipe", "pipe"],
   });
 
-  proc.on("exit", (code, signal) => {
-    console.log(
-      new Date().toISOString(),
-      "FFMPEG_EXIT",
-      "code=" + code,
-      "signal=" + signal,
-      tail.replace(/\n/g, " | ").slice(-2500)
-    );
+  let audioTail = "";
+  audio.stdout.pipe(audioFile);
+  audio.stderr.on("data", (d) => {
+    audioTail = (audioTail + String(d)).slice(-4000);
+  });
+  audio.on("exit", (code, signal) => {
+    console.log(new Date().toISOString(), "AUDIO_RECORDER_EXIT",
+      "code=" + code, "signal=" + signal,
+      audioTail.replace(/\n/g, " | ").slice(-800));
   });
 
-  return proc;
+  return { video, audio, audioFile, paths };
 }
 
-async function stopRecording(proc) {
+async function waitExit(proc, ms) {
   if (!proc || proc.exitCode !== null) return;
-
-  try { proc.kill("SIGINT"); } catch {}
-
   await Promise.race([
     new Promise((resolve) => proc.once("exit", resolve)),
-    sleep(8000),
+    sleep(ms),
   ]);
+}
 
-  if (proc.exitCode === null) {
-    try { proc.kill("SIGTERM"); } catch {}
-    await sleep(3000);
+async function stopRecording(session) {
+  if (!session) return;
+
+  const { video, audio, audioFile } = session;
+
+  if (video && video.exitCode === null) {
+    try { video.stdin.write("q\n"); } catch {}
+    await waitExit(video, 7000);
+    if (video.exitCode === null) {
+      try { video.kill("SIGINT"); } catch {}
+      await waitExit(video, 4000);
+    }
+    if (video.exitCode === null) {
+      try { video.kill("SIGKILL"); } catch {}
+      await waitExit(video, 1000);
+    }
   }
 
-  if (proc.exitCode === null) {
-    try { proc.kill("SIGKILL"); } catch {}
-    await sleep(500);
+  if (audio && audio.exitCode === null) {
+    try { audio.kill("SIGINT"); } catch {}
+    await waitExit(audio, 3000);
+    if (audio.exitCode === null) {
+      try { audio.kill("SIGTERM"); } catch {}
+      await waitExit(audio, 1500);
+    }
+    if (audio.exitCode === null) {
+      try { audio.kill("SIGKILL"); } catch {}
+    }
+  }
+
+  if (audioFile && !audioFile.closed) {
+    await new Promise((resolve) => {
+      audioFile.once("close", resolve);
+      setTimeout(resolve, 1000);
+    });
   }
 }
 
-module.exports = { ensurePulse, startRecording, stopRecording, sleep };
+function finalizeRecording(session, outputPath) {
+  const { paths } = session;
+  const videoSize = fs.existsSync(paths.video) ? fs.statSync(paths.video).size : 0;
+  const audioSize = fs.existsSync(paths.audio) ? fs.statSync(paths.audio).size : 0;
+
+  console.log(new Date().toISOString(), "CAPTURE_PARTS",
+    "video=" + videoSize, "audio=" + audioSize);
+
+  if (videoSize < 10000) {
+    throw new Error("Video capture missing or too small: " + videoSize);
+  }
+
+  try { fs.rmSync(outputPath, { force: true }); } catch {}
+
+  let args;
+  if (audioSize >= 19200) {
+    args = [
+      "-y", "-hide_banner", "-loglevel", "warning",
+      "-i", paths.video,
+      "-f", "s16le", "-ar", "48000", "-ac", "2", "-i", paths.audio,
+      "-map", "0:v:0", "-map", "1:a:0",
+      "-c:v", "copy",
+      "-c:a", "aac", "-b:a", "128k",
+      "-shortest",
+      "-movflags", "+faststart",
+      outputPath,
+    ];
+  } else {
+    console.log(new Date().toISOString(), "AUDIO_FALLBACK_SILENCE");
+    args = [
+      "-y", "-hide_banner", "-loglevel", "warning",
+      "-i", paths.video,
+      "-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo",
+      "-map", "0:v:0", "-map", "1:a:0",
+      "-c:v", "copy",
+      "-c:a", "aac", "-b:a", "128k",
+      "-shortest",
+      "-movflags", "+faststart",
+      outputPath,
+    ];
+  }
+
+  execFileSync("ffmpeg", args, {
+    stdio: ["ignore", "ignore", "pipe"],
+    maxBuffer: 8 * 1024 * 1024,
+  });
+
+  const finalSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
+  console.log(new Date().toISOString(), "FINAL_RECORDING_READY", "bytes=" + finalSize);
+  if (finalSize < 10000) {
+    throw new Error("Final recording missing or too small: " + finalSize);
+  }
+  return { videoSize, audioSize, finalSize };
+}
+
+function cleanupRecording(session, outputPath) {
+  if (session?.paths) {
+    for (const p of Object.values(session.paths)) {
+      try { fs.rmSync(p, { force: true }); } catch {}
+    }
+  }
+  try { fs.rmSync(outputPath, { force: true }); } catch {}
+}
+
+module.exports = {
+  ensurePulse,
+  startRecording,
+  stopRecording,
+  finalizeRecording,
+  cleanupRecording,
+  sleep,
+};
