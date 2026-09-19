@@ -31,7 +31,12 @@ async function runJob(job) {
     await ensurePulse();
 
     const connected = await connectBrowser();
-    page = await connected.context.newPage();
+    const existingPages = connected.context.pages();
+    page = existingPages[0] || await Promise.race([
+      connected.context.newPage(),
+      sleep(8000).then(() => { throw new Error("BROWSER_NEW_PAGE_TIMEOUT"); }),
+    ]);
+    log("BROWSER_PAGE_READY", page.url(), "existing=" + existingPages.length);
 
     await joinMeeting(page, job.meetUrl);
     log("MEET_JOINED", job.runId);
@@ -66,9 +71,6 @@ async function runJob(job) {
       "audio=" + capture.audioSize
     );
 
-    await page.close().catch(() => {});
-    page = null;
-
     log("UPLOAD_PHASE_START", job.runId);
     const result = await uploadRecording(job, filePath, startedAt);
     log("RECORDING_COMPLETED", JSON.stringify(result));
@@ -84,7 +86,7 @@ async function runJob(job) {
     } catch {}
   } finally {
     await stopRecording(recording).catch(() => {});
-    if (page) await page.close().catch(() => {});
+    // Keep the persistent Chromium tab alive for the next scheduled job.
     cleanupRecording(recording, filePath);
     active = false;
   }
