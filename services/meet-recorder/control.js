@@ -16,7 +16,7 @@ async function callControl(action, payload = {}) {
   return json;
 }
 
-async function uploadRecording(job, filePath, startedAt) {
+async function uploadFileToDrive(job, filePath) {
   const fs = require("fs");
   if (!fs.existsSync(filePath)) throw new Error("Recorded file missing");
 
@@ -44,15 +44,31 @@ async function uploadRecording(job, filePath, startedAt) {
 
   const result = await uploaded.json().catch(() => ({}));
   if (!uploaded.ok || !result.id) {
-    throw new Error("Drive upload failed");
+    throw new Error(
+      "Drive upload failed " + uploaded.status + " " + JSON.stringify(result).slice(0, 500)
+    );
   }
 
-  const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt) / 60000));
+  return { fileId: String(result.id) };
+}
+
+async function completeUploadedRecording(runId, fileId, durationMinutes) {
   return callControl("complete", {
-    runId: job.runId,
-    fileId: result.id,
-    durationMinutes,
+    runId,
+    fileId,
+    durationMinutes: Math.max(1, Number(durationMinutes || 1)),
   });
 }
 
-module.exports = { callControl, uploadRecording };
+async function uploadRecording(job, filePath, startedAt) {
+  const uploaded = await uploadFileToDrive(job, filePath);
+  const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt) / 60000));
+  return completeUploadedRecording(job.runId, uploaded.fileId, durationMinutes);
+}
+
+module.exports = {
+  callControl,
+  uploadRecording,
+  uploadFileToDrive,
+  completeUploadedRecording,
+};
