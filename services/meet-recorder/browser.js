@@ -127,6 +127,7 @@ async function restartChromium() {
     "--no-first-run",
     "--no-default-browser-check",
     "--autoplay-policy=no-user-gesture-required",
+    "--disable-features=DeviceBoundSessions,DeviceBoundSessionsForRestrictedSites,PersistDeviceBoundSessions,EnableOAuthMultiloginStandardCookiesBinding,EnableOAuthMultiloginCookiesBinding,EnableBoundSessionCredentials",
     "--remote-debugging-port=9222",
     "--remote-debugging-address=127.0.0.1",
     "--user-data-dir=/data/chrome-profile",
