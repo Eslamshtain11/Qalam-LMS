@@ -14,6 +14,10 @@ const POLL_MS = Number(process.env.QALAM_POLL_MS || 10000);
 const GRACE_SECONDS = Number(process.env.QALAM_GRACE_SECONDS || 20);
 const RECORDING_MODE = String(process.env.QALAM_RECORDING_MODE || "native_primary").toLowerCase();
 const NATIVE_CONFIRM_SECONDS = Number(process.env.QALAM_NATIVE_CONFIRM_SECONDS || 35);
+const ACTIVITY_POLL_SECONDS = Number(process.env.QALAM_ACTIVITY_POLL_SECONDS || 15);
+const NO_SHOW_SECONDS = Number(process.env.QALAM_NO_SHOW_SECONDS || 1800);
+const HARD_MAX_RECORD_SECONDS = Number(process.env.QALAM_HARD_MAX_RECORD_SECONDS || 21600);
+const LEAVE_CONFIRM_CHECKS = Number(process.env.QALAM_LEAVE_CONFIRM_CHECKS || 3);
 
 let active = false;
 let shuttingDown = false;
@@ -56,6 +60,67 @@ async function waitForNativeRecording(runId) {
   return lastState ? { state: lastState } : null;
 }
 
+async function waitForMeetingLifecycle(runId, plannedSeconds) {
+  const startedAt = Date.now();
+  const plannedStopAt = startedAt + Math.max(90, plannedSeconds) * 1000;
+  const noShowWindow = Math.min(
+    Math.max(300, plannedSeconds + GRACE_SECONDS),
+    Math.max(300, NO_SHOW_SECONDS),
+  );
+  const noShowAt = startedAt + noShowWindow * 1000;
+  const hardStopAt = startedAt + Math.max(600, HARD_MAX_RECORD_SECONDS) * 1000;
+
+  let hadOtherParticipant = false;
+  let aloneChecks = 0;
+  let consecutiveApiFailures = 0;
+
+  while (Date.now() < hardStopAt) {
+    try {
+      const activity = await callControl("meeting_activity", { runId });
+      consecutiveApiFailures = 0;
+
+      const count = Number(activity?.activeParticipantCount || 0);
+      const found = activity?.found === true;
+      log(
+        "MEETING_ACTIVITY",
+        runId,
+        "found=" + found,
+        "active=" + count,
+        "ended=" + (activity?.conferenceEnded === true),
+      );
+
+      if (activity?.conferenceEnded === true) {
+        return { reason: "conference_ended", activeParticipantCount: count };
+      }
+
+      if (found && count > 1) {
+        hadOtherParticipant = true;
+        aloneChecks = 0;
+      } else if (found && hadOtherParticipant && count <= 1) {
+        aloneChecks += 1;
+        if (aloneChecks >= Math.max(2, LEAVE_CONFIRM_CHECKS)) {
+          return { reason: "participants_left", activeParticipantCount: count };
+        }
+      } else if (found && !hadOtherParticipant && Date.now() >= noShowAt) {
+        return { reason: "no_show_timeout", activeParticipantCount: count };
+      }
+    } catch (e) {
+      consecutiveApiFailures += 1;
+      log("MEETING_ACTIVITY_WARNING", runId, String(e?.message || e));
+    }
+
+    // If Google activity telemetry is unavailable, preserve the old schedule-based
+    // stop as a safe fallback instead of recording forever.
+    if (consecutiveApiFailures >= 4 && Date.now() >= plannedStopAt) {
+      return { reason: "activity_api_unavailable" };
+    }
+
+    await sleep(Math.max(5, ACTIVITY_POLL_SECONDS) * 1000);
+  }
+
+  return { reason: "hard_cap" };
+}
+
 async function runJob(job) {
   active = true;
   const startedAt = Date.now();
@@ -78,8 +143,9 @@ async function runJob(job) {
     ]);
     log("BROWSER_PAGE_READY", page.url(), "existing=" + existingPages.length);
 
-    await joinMeeting(page, job.meetUrl);
-    log("MEET_JOINED", job.runId);
+    const joinResult = await joinMeeting(page, job.meetUrl);
+    const joinMode = String(joinResult?.mode || "unknown");
+    log("MEET_JOINED", job.runId, "mode=" + joinMode);
 
     await callControl("host_ready", { runId: job.runId });
     log("HOST_READY", job.runId);
@@ -89,14 +155,14 @@ async function runJob(job) {
     const planned = maxTestSeconds > 0 ? Math.min(requested, maxTestSeconds) : requested;
     const recordSeconds = planned + GRACE_SECONDS;
 
-    if (RECORDING_MODE !== "custom") {
+    if (RECORDING_MODE !== "custom" && joinMode === "authenticated") {
       const native = await waitForNativeRecording(job.runId);
       if (native && ["STARTED", "ENDED", "FILE_GENERATED"].includes(native.state)) {
         await callControl("native_started", { runId: job.runId });
         log("NATIVE_RECORDING_CONFIRMED", job.runId, native.state);
         log("NATIVE_PRIMARY_ACTIVE", job.runId, recordSeconds);
-        await sleep(recordSeconds * 1000);
-        log("NATIVE_PRIMARY_HANDOFF", job.runId);
+        const lifecycle = await waitForMeetingLifecycle(job.runId, planned);
+        log("NATIVE_PRIMARY_HANDOFF", job.runId, JSON.stringify(lifecycle));
         return;
       }
 
@@ -105,6 +171,11 @@ async function runJob(job) {
       }
 
       log("NATIVE_RECORDING_NOT_CONFIRMED_FALLBACK_CUSTOM", job.runId);
+    } else if (RECORDING_MODE !== "custom" && joinMode !== "authenticated") {
+      if (RECORDING_MODE === "native_only") {
+        throw new Error("Native Google Meet recording requires an authenticated host/co-host");
+      }
+      log("AUTH_UNAVAILABLE_FALLBACK_CUSTOM", job.runId, "joinMode=" + joinMode);
     }
 
     recording = await startRecording(page, basePath);
@@ -119,7 +190,8 @@ async function runJob(job) {
 
     await callControl("started", { runId: job.runId });
     log("FALLBACK_RECORDING_STARTED", job.runId, recordSeconds);
-    await sleep(recordSeconds * 1000);
+    const lifecycle = await waitForMeetingLifecycle(job.runId, planned);
+    log("RECORDING_STOP_CONDITION", job.runId, JSON.stringify(lifecycle));
 
     log("RECORDING_STOPPING", job.runId);
     await stopRecording(recording);
@@ -157,7 +229,15 @@ async function runJob(job) {
 async function loop() {
   await ensurePulse();
   log("QALAM_RECORDER_READY");
-  log("RECORDING_MODE", RECORDING_MODE, "nativeConfirmSeconds=" + NATIVE_CONFIRM_SECONDS);
+  log(
+    "RECORDING_MODE",
+    RECORDING_MODE,
+    "nativeConfirmSeconds=" + NATIVE_CONFIRM_SECONDS,
+    "zeroTouch=" + (process.env.QALAM_ZERO_TOUCH !== "0"),
+    "activityPollSeconds=" + ACTIVITY_POLL_SECONDS,
+    "noShowSeconds=" + NO_SHOW_SECONDS,
+    "hardMaxSeconds=" + HARD_MAX_RECORD_SECONDS,
+  );
   log("SCHEDULE_POLLING_ENABLED");
 
   while (true) {
