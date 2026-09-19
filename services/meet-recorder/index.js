@@ -46,7 +46,9 @@ async function runJob(job) {
       log("AUDIO_CAPTURE_WARNING", "parec exited early; silent fallback will be used");
     }
 
-    const planned = Math.max(30, Number(job.plannedSeconds || 60));
+    const requested = Math.max(10, Number(job.plannedSeconds || 60));
+    const maxTestSeconds = Number(process.env.QALAM_TEST_MAX_RECORD_SECONDS || 0);
+    const planned = maxTestSeconds > 0 ? Math.min(requested, maxTestSeconds) : requested;
     const recordSeconds = planned + GRACE_SECONDS;
 
     log("RECORDING_STARTED", job.runId, recordSeconds);
