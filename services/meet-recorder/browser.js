@@ -297,4 +297,21 @@ async function joinMeeting(page, url) {
   return "JOIN_CLICKED";
 }
 
-module.exports = { connectBrowser, joinMeeting };
+async function closeBrowserGracefully() {
+  try {
+    const wsUrl = await waitForCdp(2);
+    const browser = await chromium.connectOverCDP(wsUrl, { timeout: 8000 });
+    await browser.close();
+    console.log(new Date().toISOString(), "CHROMIUM_GRACEFUL_CLOSE_OK");
+    return true;
+  } catch (e) {
+    console.log(
+      new Date().toISOString(),
+      "CHROMIUM_GRACEFUL_CLOSE_WARNING",
+      String(e?.message || e),
+    );
+    return false;
+  }
+}
+
+module.exports = { connectBrowser, joinMeeting, closeBrowserGracefully };
