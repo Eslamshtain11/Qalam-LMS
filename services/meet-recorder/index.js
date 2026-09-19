@@ -8,7 +8,7 @@ const {
   cleanupRecording,
   sleep,
 } = require("./media");
-const { connectBrowser, joinMeeting } = require("./browser");
+const { connectBrowser, joinMeeting, closeBrowserGracefully } = require("./browser");
 
 const POLL_MS = Number(process.env.QALAM_POLL_MS || 10000);
 const GRACE_SECONDS = Number(process.env.QALAM_GRACE_SECONDS || 20);
@@ -16,7 +16,24 @@ const RECORDING_MODE = String(process.env.QALAM_RECORDING_MODE || "native_primar
 const NATIVE_CONFIRM_SECONDS = Number(process.env.QALAM_NATIVE_CONFIRM_SECONDS || 35);
 
 let active = false;
+let shuttingDown = false;
 const log = (...args) => console.log(new Date().toISOString(), ...args);
+
+async function gracefulShutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  log("GRACEFUL_SHUTDOWN_START", signal);
+  try {
+    await closeBrowserGracefully();
+  } catch (e) {
+    log("GRACEFUL_SHUTDOWN_WARNING", String(e?.message || e));
+  }
+  log("GRACEFUL_SHUTDOWN_DONE", signal);
+  process.exit(0);
+}
+
+process.on("SIGTERM", () => { void gracefulShutdown("SIGTERM"); });
+process.on("SIGINT", () => { void gracefulShutdown("SIGINT"); });
 
 async function waitForNativeRecording(runId) {
   const deadline = Date.now() + Math.max(10, NATIVE_CONFIRM_SECONDS) * 1000;
