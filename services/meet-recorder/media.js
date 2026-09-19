@@ -1,7 +1,6 @@
 const fs = require("fs");
 const { spawn, execFileSync } = require("child_process");
 
-const DISPLAY = process.env.DISPLAY || ":99";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function exec(cmd, args = []) {
@@ -46,7 +45,6 @@ async function ensurePulse() {
     await sleep(400);
     sources = exec("pactl", ["list", "short", "sources"]);
   }
-
   if (!sources.includes("qalamrec.monitor")) {
     throw new Error("qalamrec.monitor unavailable");
   }
@@ -62,21 +60,49 @@ function capturePaths(basePath) {
   };
 }
 
-function startRecording(basePath) {
+async function startRecording(page, basePath) {
   const paths = capturePaths(basePath);
   for (const p of Object.values(paths)) {
     try { fs.rmSync(p, { force: true }); } catch {}
   }
 
+  const cdp = await page.context().newCDPSession(page);
+  let latestFrame = null;
+  let firstFrameResolve;
+  const firstFrame = new Promise((resolve) => { firstFrameResolve = resolve; });
+
+  cdp.on("Page.screencastFrame", async (event) => {
+    latestFrame = Buffer.from(event.data, "base64");
+    firstFrameResolve?.();
+    firstFrameResolve = null;
+    try {
+      await cdp.send("Page.screencastFrameAck", { sessionId: event.sessionId });
+    } catch {}
+  });
+
+  await cdp.send("Page.startScreencast", {
+    format: "jpeg",
+    quality: 72,
+    maxWidth: 1280,
+    maxHeight: 720,
+    everyNthFrame: 1,
+  });
+
+  await Promise.race([
+    firstFrame,
+    sleep(8000).then(() => { throw new Error("Chromium screencast produced no frame"); }),
+  ]);
+
   const video = spawn("ffmpeg", [
     "-y",
     "-hide_banner",
     "-loglevel", "warning",
-    "-f", "x11grab",
-    "-video_size", "1280x720",
-    "-framerate", "20",
-    "-i", DISPLAY + ".0",
+    "-f", "image2pipe",
+    "-framerate", "10",
+    "-vcodec", "mjpeg",
+    "-i", "pipe:0",
     "-an",
+    "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
     "-c:v", "libx264",
     "-preset", "veryfast",
     "-crf", "28",
@@ -84,19 +110,27 @@ function startRecording(basePath) {
     "-f", "matroska",
     paths.video,
   ], {
-    env: { ...process.env, DISPLAY },
     stdio: ["pipe", "ignore", "pipe"],
   });
 
   let videoTail = "";
+  let canWrite = true;
   video.stderr.on("data", (d) => {
     videoTail = (videoTail + String(d)).slice(-6000);
   });
+  video.stdin.on("drain", () => { canWrite = true; });
   video.on("exit", (code, signal) => {
     console.log(new Date().toISOString(), "VIDEO_RECORDER_EXIT",
       "code=" + code, "signal=" + signal,
       videoTail.replace(/\n/g, " | ").slice(-1200));
   });
+
+  const frameTimer = setInterval(() => {
+    if (!latestFrame || !canWrite || video.exitCode !== null) return;
+    try {
+      canWrite = video.stdin.write(latestFrame);
+    } catch {}
+  }, 100);
 
   const audioFile = fs.createWriteStream(paths.audio);
   const audio = spawn("parec", [
@@ -121,7 +155,7 @@ function startRecording(basePath) {
       audioTail.replace(/\n/g, " | ").slice(-800));
   });
 
-  return { video, audio, audioFile, paths };
+  return { video, audio, audioFile, paths, cdp, frameTimer };
 }
 
 async function waitExit(proc, ms) {
@@ -134,15 +168,19 @@ async function waitExit(proc, ms) {
 
 async function stopRecording(session) {
   if (!session) return;
+  const { video, audio, audioFile, cdp, frameTimer } = session;
 
-  const { video, audio, audioFile } = session;
+  if (frameTimer) clearInterval(frameTimer);
+  if (cdp) {
+    try { await cdp.send("Page.stopScreencast"); } catch {}
+  }
 
   if (video && video.exitCode === null) {
-    try { video.stdin.write("q\n"); } catch {}
-    await waitExit(video, 7000);
+    try { video.stdin.end(); } catch {}
+    await waitExit(video, 8000);
     if (video.exitCode === null) {
       try { video.kill("SIGINT"); } catch {}
-      await waitExit(video, 4000);
+      await waitExit(video, 3000);
     }
     if (video.exitCode === null) {
       try { video.kill("SIGKILL"); } catch {}
@@ -167,6 +205,10 @@ async function stopRecording(session) {
       audioFile.once("close", resolve);
       setTimeout(resolve, 1000);
     });
+  }
+
+  if (cdp) {
+    try { await cdp.detach(); } catch {}
   }
 }
 
@@ -193,6 +235,7 @@ function finalizeRecording(session, outputPath) {
       "-map", "0:v:0", "-map", "1:a:0",
       "-c:v", "copy",
       "-c:a", "aac", "-b:a", "128k",
+      "-af", "apad",
       "-shortest",
       "-movflags", "+faststart",
       outputPath,
