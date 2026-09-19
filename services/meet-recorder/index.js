@@ -44,24 +44,26 @@ async function runJob(job) {
     }
 
     const planned = Math.max(30, Number(job.plannedSeconds || 60));
-    const deadline = Date.now() + (planned + GRACE_SECONDS) * 1000;
+    const recordSeconds = planned + GRACE_SECONDS;
 
-    log("RECORDING_STARTED", job.runId, planned + GRACE_SECONDS);
+    log("RECORDING_STARTED", job.runId, recordSeconds);
 
-    while (Date.now() < deadline) {
-      await sleep(10000);
-      const text = await page.locator("body").innerText().catch(() => "");
-      if (/you left the meeting|you've left|لقد غادرت|meeting ended|تم إنهاء الاجتماع/i.test(text)) {
-        break;
-      }
-    }
+    await sleep(recordSeconds * 1000);
 
+    log("RECORDING_STOPPING", job.runId);
     await stopRecording(recorder);
     recorder = null;
+
+    const size = fs.existsSync(filePath) ? fs.statSync(filePath).size : 0;
+    log("RECORDED_FILE_READY", job.runId, "bytes=" + size);
+    if (size < 10000) {
+      throw new Error("Recorded file missing or too small: " + size);
+    }
 
     await page.close().catch(() => {});
     page = null;
 
+    log("UPLOAD_PHASE_START", job.runId);
     const result = await uploadRecording(job, filePath, startedAt);
     log("RECORDING_COMPLETED", JSON.stringify(result));
     return true;
