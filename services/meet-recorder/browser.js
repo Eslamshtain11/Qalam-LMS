@@ -177,34 +177,20 @@ async function joinMeeting(page, url) {
 
   if (!joined) {
     console.log(new Date().toISOString(), "MEET_JOIN_BUTTON_NOT_FOUND");
-  }
-
-  await sleep(9000);
-
-  const after = await domSnapshot(page);
-  const text = after.body || "";
-  console.log(
-    new Date().toISOString(),
-    "MEET_AFTER_JOIN_SNAPSHOT",
-    text.replace(/\n/g, " | ").slice(0, 1000),
-  );
-
-  if (/you can't join this video call|لا يمكنك الانضمام/i.test(text)) {
-    throw new Error("Meeting admission denied");
-  }
-
-  if (/sign in|تسجيل الدخول/i.test(text) &&
-      !/leave call|مغادرة المكالمة|people|الأشخاص|participant|مشارك/i.test(text)) {
-    throw new Error("Google session is not authenticated");
-  }
-
-  if (!joined &&
-      !/leave call|مغادرة المكالمة|people|الأشخاص|participant|مشارك|meeting details|تفاصيل الاجتماع/i.test(text)) {
+    const after = await domSnapshot(page).catch(() => ({ body: "" }));
+    const text = after.body || "";
+    if (/you can't join this video call|لا يمكنك الانضمام/i.test(text)) {
+      throw new Error("Meeting admission denied");
+    }
     throw new Error("Meet join button was not found");
   }
 
+  // Meet's active-call page can block normal DOM evaluation for long periods.
+  // Once the enabled Join button has been clicked successfully, continue via CDP recording
+  // instead of waiting on another DOM snapshot.
+  await sleep(6000);
   console.log(new Date().toISOString(), "MEET_JOIN_FLOW_DONE");
-  return text;
+  return "JOIN_CLICKED";
 }
 
 module.exports = { connectBrowser, joinMeeting };
