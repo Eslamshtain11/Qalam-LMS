@@ -42,22 +42,53 @@ async function connectBrowser() {
   return { browser, context: contexts[0] };
 }
 
-async function clickAny(page, labels) {
-  for (const label of labels) {
-    const rx = new RegExp(label, "i");
-    const candidates = [
-      page.getByRole("button", { name: rx }),
-      page.getByText(rx, { exact: false }),
-    ];
-    for (const item of candidates) {
-      try {
-        if (await item.first().isVisible({ timeout: 700 })) {
-          await item.first().click({ timeout: 2500 });
-          console.log(new Date().toISOString(), "MEET_CLICKED", label);
-          return true;
+async function domSnapshot(page) {
+  return await withTimeout(
+    "MEET_DOM_SNAPSHOT",
+    page.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll("button")).slice(0, 60).map((b) => ({
+        text: String(b.innerText || "").trim(),
+        aria: String(b.getAttribute("aria-label") || "").trim(),
+        disabled: !!b.disabled,
+      }));
+      return {
+        body: String(document.body?.innerText || "").slice(0, 1800),
+        buttons,
+      };
+    }),
+    5000,
+  );
+}
+
+async function clickDomButton(page, labels, logName) {
+  const clicked = await withTimeout(
+    "MEET_DOM_CLICK",
+    page.evaluate((wanted) => {
+      const normalize = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+      const labels = wanted.map(normalize);
+      const buttons = Array.from(document.querySelectorAll("button"));
+
+      for (const button of buttons) {
+        if (button.disabled) continue;
+        const hay = normalize(
+          (button.innerText || "") + " " +
+          (button.getAttribute("aria-label") || "") + " " +
+          (button.getAttribute("data-tooltip") || "")
+        );
+        if (!hay) continue;
+        if (labels.some((label) => hay.includes(label))) {
+          button.click();
+          return hay;
         }
-      } catch {}
-    }
+      }
+      return null;
+    }, labels),
+    5000,
+  );
+
+  if (clicked) {
+    console.log(new Date().toISOString(), "MEET_DOM_CLICKED", logName, clicked.slice(0, 180));
+    return true;
   }
   return false;
 }
@@ -80,37 +111,48 @@ async function joinMeeting(page, url) {
     throw new Error("Meet did not open; current URL: " + currentUrl);
   }
 
-  await clickAny(page, [
-    "Turn off microphone",
-    "Mute microphone",
-    "إيقاف الميكروفون",
-    "كتم الميكروفون",
-  ]);
-  await clickAny(page, [
-    "Turn off camera",
-    "Turn camera off",
+  const pre = await domSnapshot(page);
+  console.log(
+    new Date().toISOString(),
+    "MEET_PREJOIN_SNAPSHOT",
+    JSON.stringify({
+      body: pre.body.replace(/\n/g, " | ").slice(0, 900),
+      buttons: pre.buttons.slice(0, 30),
+    }),
+  );
+
+  await clickDomButton(page, [
+    "turn off microphone", "mute microphone",
+    "إيقاف الميكروفون", "كتم الميكروفون",
+  ], "MIC");
+
+  await clickDomButton(page, [
+    "turn off camera", "turn camera off",
     "إيقاف الكاميرا",
-  ]);
+  ], "CAMERA");
 
-  const clicked = await clickAny(page, [
-    "Join now",
+  const joined = await clickDomButton(page, [
+    "join now",
     "الانضمام الآن",
-    "Join",
-    "انضمام",
-    "Ask to join",
+    "ask to join",
     "طلب الانضمام",
-  ]);
+    "join",
+    "انضمام",
+  ], "JOIN");
 
-  if (!clicked) {
+  if (!joined) {
     console.log(new Date().toISOString(), "MEET_JOIN_BUTTON_NOT_FOUND");
-    try { await page.keyboard.press("Enter"); } catch {}
   }
 
   await sleep(9000);
 
-  const text = await page.locator("body").innerText({ timeout: 5000 }).catch(() => "");
-  const sample = String(text || "").replace(/\n/g, " | ").slice(0, 700);
-  console.log(new Date().toISOString(), "MEET_BODY_SAMPLE", sample);
+  const after = await domSnapshot(page);
+  const text = after.body || "";
+  console.log(
+    new Date().toISOString(),
+    "MEET_AFTER_JOIN_SNAPSHOT",
+    text.replace(/\n/g, " | ").slice(0, 1000),
+  );
 
   if (/you can't join this video call|لا يمكنك الانضمام/i.test(text)) {
     throw new Error("Meeting admission denied");
@@ -119,6 +161,11 @@ async function joinMeeting(page, url) {
   if (/sign in|تسجيل الدخول/i.test(text) &&
       !/leave call|مغادرة المكالمة|people|الأشخاص|participant|مشارك/i.test(text)) {
     throw new Error("Google session is not authenticated");
+  }
+
+  if (!joined &&
+      !/leave call|مغادرة المكالمة|people|الأشخاص|participant|مشارك|meeting details|تفاصيل الاجتماع/i.test(text)) {
+    throw new Error("Meet join button was not found");
   }
 
   console.log(new Date().toISOString(), "MEET_JOIN_FLOW_DONE");
