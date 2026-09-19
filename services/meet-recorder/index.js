@@ -36,7 +36,7 @@ async function runJob(job) {
     await joinMeeting(page, job.meetUrl);
     log("MEET_JOINED", job.runId);
 
-    recording = startRecording(basePath);
+    recording = await startRecording(page, basePath);
     await sleep(2500);
 
     if (recording.video.exitCode !== null) {
