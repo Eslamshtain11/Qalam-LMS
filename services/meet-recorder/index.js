@@ -6,6 +6,13 @@ const { connectBrowser, joinMeeting } = require("./browser");
 const POLL_MS = Number(process.env.QALAM_POLL_MS || 10000);
 const GRACE_SECONDS = Number(process.env.QALAM_GRACE_SECONDS || 20);
 
+const MANUAL_RUN_ID = process.env.QALAM_MANUAL_RUN_ID || "";
+const MANUAL_MEET_URL = process.env.QALAM_MANUAL_MEET_URL || "";
+const MANUAL_TITLE = process.env.QALAM_MANUAL_TITLE || "Qalam recorder test";
+const MANUAL_DATE = process.env.QALAM_MANUAL_DATE || "2026-09-19";
+const MANUAL_SECONDS = Number(process.env.QALAM_MANUAL_SECONDS || 45);
+const MANUAL_MARKER = "/data/qalam-manual-test-done";
+
 let active = false;
 
 const log = (...args) => console.log(new Date().toISOString(), ...args);
@@ -15,7 +22,6 @@ async function runJob(job) {
   const startedAt = Date.now();
   const filePath = "/tmp/qalam-" + job.runId + ".mp4";
 
-  let browser = null;
   let page = null;
   let recorder = null;
 
@@ -25,7 +31,6 @@ async function runJob(job) {
     await ensurePulse();
 
     const connected = await connectBrowser();
-    browser = connected.browser;
     page = await connected.context.newPage();
 
     await joinMeeting(page, job.meetUrl);
@@ -38,7 +43,7 @@ async function runJob(job) {
       throw new Error("Recorder exited immediately");
     }
 
-    const planned = Math.max(60, Number(job.plannedSeconds || 120));
+    const planned = Math.max(30, Number(job.plannedSeconds || 60));
     const deadline = Date.now() + (planned + GRACE_SECONDS) * 1000;
 
     log("RECORDING_STARTED", job.runId, planned + GRACE_SECONDS);
@@ -59,6 +64,7 @@ async function runJob(job) {
 
     const result = await uploadRecording(job, filePath, startedAt);
     log("RECORDING_COMPLETED", JSON.stringify(result));
+    return true;
   } catch (e) {
     const message = String(e?.stack || e?.message || e);
     log("JOB_FAILED", message);
@@ -69,18 +75,66 @@ async function runJob(job) {
         message: message.slice(0, 900),
       });
     } catch {}
+
+    return false;
   } finally {
     await stopRecording(recorder).catch(() => {});
     if (page) await page.close().catch(() => {});
-    if (browser) await browser.close().catch(() => {});
     try { fs.rmSync(filePath, { force: true }); } catch {}
     active = false;
+  }
+}
+
+async function visibleAccountPage() {
+  try {
+    const connected = await connectBrowser();
+    return connected.context.pages().some((page) => {
+      try {
+        return new URL(page.url()).hostname === "myaccount.google.com";
+      } catch {
+        return false;
+      }
+    });
+  } catch {
+    return false;
+  }
+}
+
+async function runManualTestWhenReady() {
+  if (!MANUAL_RUN_ID || !MANUAL_MEET_URL || fs.existsSync(MANUAL_MARKER)) return;
+
+  log("MANUAL_TEST_WAITING");
+
+  while (!fs.existsSync(MANUAL_MARKER)) {
+    if (await visibleAccountPage()) {
+      const job = {
+        runId: MANUAL_RUN_ID,
+        title: MANUAL_TITLE,
+        meetUrl: MANUAL_MEET_URL,
+        occurrenceDate: MANUAL_DATE,
+        plannedSeconds: MANUAL_SECONDS,
+      };
+
+      const ok = await runJob(job);
+      if (ok) {
+        fs.writeFileSync(MANUAL_MARKER, new Date().toISOString());
+        log("MANUAL_TEST_COMPLETED");
+        return;
+      }
+
+      log("MANUAL_TEST_RETRY");
+      await sleep(10000);
+    } else {
+      await sleep(5000);
+    }
   }
 }
 
 async function loop() {
   await ensurePulse();
   log("QALAM_RECORDER_READY");
+
+  await runManualTestWhenReady();
 
   while (true) {
     try {
