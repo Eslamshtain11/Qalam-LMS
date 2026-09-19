@@ -172,7 +172,10 @@ async function stopRecording(session) {
 
   if (frameTimer) clearInterval(frameTimer);
   if (cdp) {
-    try { await cdp.send("Page.stopScreencast"); } catch {}
+    await Promise.race([
+      cdp.send("Page.stopScreencast").catch(() => {}),
+      sleep(1500),
+    ]);
   }
 
   if (video && video.exitCode === null) {
@@ -208,7 +211,10 @@ async function stopRecording(session) {
   }
 
   if (cdp) {
-    try { await cdp.detach(); } catch {}
+    await Promise.race([
+      cdp.detach().catch(() => {}),
+      sleep(1000),
+    ]);
   }
 }
 
