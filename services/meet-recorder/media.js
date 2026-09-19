@@ -55,7 +55,7 @@ async function ensurePulse() {
 
 function capturePaths(basePath) {
   return {
-    video: basePath + ".video.mkv",
+    video: basePath + ".video.ts",
     audio: basePath + ".audio.raw",
   };
 }
@@ -68,11 +68,29 @@ async function startRecording(page, basePath) {
 
   const cdp = await page.context().newCDPSession(page);
   let latestFrame = null;
+  let framesReceived = 0;
+  let framesWritten = 0;
+  let bytesWritten = 0;
   let firstFrameResolve;
   const firstFrame = new Promise((resolve) => { firstFrameResolve = resolve; });
 
   cdp.on("Page.screencastFrame", async (event) => {
     latestFrame = Buffer.from(event.data, "base64");
+    framesReceived += 1;
+    if (framesReceived === 1) {
+      const jpegMagic =
+        latestFrame.length >= 4 &&
+        latestFrame[0] === 0xff &&
+        latestFrame[1] === 0xd8 &&
+        latestFrame[latestFrame.length - 2] === 0xff &&
+        latestFrame[latestFrame.length - 1] === 0xd9;
+      console.log(
+        new Date().toISOString(),
+        "VIDEO_FIRST_FRAME",
+        "bytes=" + latestFrame.length,
+        "jpeg=" + jpegMagic,
+      );
+    }
     firstFrameResolve?.();
     firstFrameResolve = null;
     try {
@@ -105,9 +123,14 @@ async function startRecording(page, basePath) {
     "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
     "-c:v", "libx264",
     "-preset", "veryfast",
+    "-tune", "zerolatency",
     "-crf", "28",
     "-pix_fmt", "yuv420p",
-    "-f", "matroska",
+    "-g", "20",
+    "-keyint_min", "20",
+    "-sc_threshold", "0",
+    "-f", "mpegts",
+    "-muxdelay", "0",
     paths.video,
   ], {
     stdio: ["pipe", "ignore", "pipe"],
@@ -139,9 +162,27 @@ async function startRecording(page, basePath) {
   const frameTimer = setInterval(() => {
     if (!latestFrame || !canWrite || video.exitCode !== null) return;
     try {
+      framesWritten += 1;
+      bytesWritten += latestFrame.length;
       canWrite = video.stdin.write(latestFrame);
     } catch {}
   }, 100);
+
+  const statsTimer = setInterval(() => {
+    let outputSize = 0;
+    try {
+      outputSize = fs.existsSync(paths.video) ? fs.statSync(paths.video).size : 0;
+    } catch {}
+    console.log(
+      new Date().toISOString(),
+      "VIDEO_CAPTURE_STATS",
+      "received=" + framesReceived,
+      "written=" + framesWritten,
+      "inputBytes=" + bytesWritten,
+      "outputBytes=" + outputSize,
+      "backpressure=" + (!canWrite),
+    );
+  }, 15000);
 
   const audioFile = fs.createWriteStream(paths.audio);
   audioFile.on("error", (err) => {
@@ -176,7 +217,7 @@ async function startRecording(page, basePath) {
       audioTail.replace(/\n/g, " | ").slice(-800));
   });
 
-  return { video, audio, audioFile, paths, cdp, frameTimer };
+  return { video, audio, audioFile, paths, cdp, frameTimer, statsTimer };
 }
 
 async function waitExit(proc, ms) {
@@ -189,9 +230,10 @@ async function waitExit(proc, ms) {
 
 async function stopRecording(session) {
   if (!session) return;
-  const { video, audio, audioFile, cdp, frameTimer } = session;
+  const { video, audio, audioFile, cdp, frameTimer, statsTimer } = session;
 
   if (frameTimer) clearInterval(frameTimer);
+  if (statsTimer) clearInterval(statsTimer);
   if (cdp) {
     await Promise.race([
       cdp.send("Page.stopScreencast").catch(() => {}),
