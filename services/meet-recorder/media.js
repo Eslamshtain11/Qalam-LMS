@@ -119,6 +119,17 @@ async function startRecording(page, basePath) {
     videoTail = (videoTail + String(d)).slice(-6000);
   });
   video.stdin.on("drain", () => { canWrite = true; });
+  video.stdin.on("error", (err) => {
+    canWrite = false;
+    if (err?.code === "EPIPE") {
+      console.log(new Date().toISOString(), "VIDEO_PIPE_CLOSED");
+      return;
+    }
+    console.log(new Date().toISOString(), "VIDEO_PIPE_ERROR", String(err?.message || err));
+  });
+  video.on("error", (err) => {
+    console.log(new Date().toISOString(), "VIDEO_PROCESS_ERROR", String(err?.message || err));
+  });
   video.on("exit", (code, signal) => {
     console.log(new Date().toISOString(), "VIDEO_RECORDER_EXIT",
       "code=" + code, "signal=" + signal,
@@ -133,6 +144,10 @@ async function startRecording(page, basePath) {
   }, 100);
 
   const audioFile = fs.createWriteStream(paths.audio);
+  audioFile.on("error", (err) => {
+    console.log(new Date().toISOString(), "AUDIO_FILE_ERROR", String(err?.message || err));
+  });
+
   const audio = spawn("parec", [
     "--device=qalamrec.monitor",
     "--format=s16le",
@@ -145,6 +160,12 @@ async function startRecording(page, basePath) {
   });
 
   let audioTail = "";
+  audio.stdout.on("error", (err) => {
+    console.log(new Date().toISOString(), "AUDIO_PIPE_ERROR", String(err?.message || err));
+  });
+  audio.on("error", (err) => {
+    console.log(new Date().toISOString(), "AUDIO_PROCESS_ERROR", String(err?.message || err));
+  });
   audio.stdout.pipe(audioFile);
   audio.stderr.on("data", (d) => {
     audioTail = (audioTail + String(d)).slice(-4000);
