@@ -4,6 +4,54 @@ const { chromium } = require("playwright-core");
 const { sleep } = require("./media");
 
 const CDP_HTTP = "http://127.0.0.1:9222";
+const GOOGLE_COOKIE_BACKUP = "/data/google-session-cookies.json";
+
+async function restoreGoogleCookies(context) {
+  try {
+    if (!fs.existsSync(GOOGLE_COOKIE_BACKUP)) return 0;
+    const parsed = JSON.parse(fs.readFileSync(GOOGLE_COOKIE_BACKUP, "utf8"));
+    const cookies = Array.isArray(parsed) ? parsed : [];
+    if (!cookies.length) return 0;
+    await context.addCookies(cookies);
+    console.log(new Date().toISOString(), "GOOGLE_COOKIES_RESTORED", cookies.length);
+    return cookies.length;
+  } catch (e) {
+    console.log(
+      new Date().toISOString(),
+      "GOOGLE_COOKIES_RESTORE_WARNING",
+      String(e?.message || e),
+    );
+    return 0;
+  }
+}
+
+async function backupGoogleCookies(context) {
+  try {
+    const cookies = await context.cookies([
+      "https://accounts.google.com/",
+      "https://myaccount.google.com/",
+      "https://meet.google.com/",
+    ]);
+    const googleCookies = cookies.filter((cookie) =>
+      String(cookie.domain || "").includes("google.com")
+    );
+    if (!googleCookies.length) return 0;
+    fs.writeFileSync(
+      GOOGLE_COOKIE_BACKUP,
+      JSON.stringify(googleCookies),
+      { mode: 0o600 },
+    );
+    console.log(new Date().toISOString(), "GOOGLE_COOKIES_BACKED_UP", googleCookies.length);
+    return googleCookies.length;
+  } catch (e) {
+    console.log(
+      new Date().toISOString(),
+      "GOOGLE_COOKIES_BACKUP_WARNING",
+      String(e?.message || e),
+    );
+    return 0;
+  }
+}
 
 async function withTimeout(label, promise, ms) {
   let timer;
@@ -135,6 +183,7 @@ async function connectBrowser() {
 
   const contexts = browser.contexts();
   if (!contexts.length) throw new Error("No browser context");
+  await restoreGoogleCookies(contexts[0]);
   console.log(new Date().toISOString(), "BROWSER_CONNECTED");
   return { browser, context: contexts[0] };
 }
@@ -226,6 +275,10 @@ async function joinMeeting(page, url) {
   }
   if (/what's your name\?|sign in/i.test(preText) && allowGuestMediaSmoke) {
     console.log(new Date().toISOString(), "MEET_GUEST_MEDIA_SMOKE_ONLY");
+  }
+
+  if (!/what's your name\?|sign in/i.test(preText)) {
+    await backupGoogleCookies(page.context());
   }
 
   await clickDomButton(page, [
