@@ -5,7 +5,7 @@ echo QALAM_INTEGRATED_BOOT
 
 apt-get update -qq
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
-  chromium ffmpeg pulseaudio xvfb x11vnc websockify novnc git curl >/dev/null
+  chromium ffmpeg pulseaudio pulseaudio-utils xvfb x11vnc websockify novnc git curl >/dev/null
 
 rm -f /data/chrome-profile/SingletonLock \
       /data/chrome-profile/SingletonSocket \
@@ -21,9 +21,11 @@ pulseaudio --daemonize=yes --exit-idle-time=-1 --disable-shm=yes >/tmp/pulse.log
 sleep 1
 
 if ! pactl list short sources 2>/dev/null | grep -q qalamrec.monitor; then
-  pactl load-module module-null-sink sink_name=qalamrec sink_properties=device.description=QalamRecorder >/dev/null
+  pactl load-module module-null-sink sink_name=qalamrec rate=48000 channels=2 \
+    sink_properties=device.description=QalamRecorder >/dev/null
 fi
 pactl set-default-sink qalamrec
+pactl set-sink-mute qalamrec 0 || true
 
 x11vnc \
   -display :99 \
