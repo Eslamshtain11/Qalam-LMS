@@ -1,10 +1,30 @@
 const { chromium } = require("playwright-core");
 const { sleep } = require("./media");
 
+async function withTimeout(label, promise, ms) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(label + "_TIMEOUT")), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 async function connectBrowser() {
-  const browser = await chromium.connectOverCDP("http://127.0.0.1:9222");
+  console.log(new Date().toISOString(), "BROWSER_CONNECT_START");
+  const browser = await withTimeout(
+    "BROWSER_CONNECT",
+    chromium.connectOverCDP("http://127.0.0.1:9222"),
+    12000,
+  );
   const contexts = browser.contexts();
   if (!contexts.length) throw new Error("No browser context");
+  console.log(new Date().toISOString(), "BROWSER_CONNECTED");
   return { browser, context: contexts[0] };
 }
 
@@ -19,6 +39,7 @@ async function clickAny(page, labels) {
       try {
         if (await item.first().isVisible({ timeout: 700 })) {
           await item.first().click({ timeout: 2500 });
+          console.log(new Date().toISOString(), "MEET_CLICKED", label);
           return true;
         }
       } catch {}
@@ -28,20 +49,19 @@ async function clickAny(page, labels) {
 }
 
 async function joinMeeting(page, url) {
-  const cdp = await page.context().newCDPSession(page);
+  console.log(new Date().toISOString(), "MEET_NAV_START");
+
   try {
-    await cdp.send("Page.enable");
-    const nav = await cdp.send("Page.navigate", { url });
-    if (nav?.errorText) throw new Error("Meet navigation failed: " + nav.errorText);
-  } finally {
-    try { await cdp.detach(); } catch {}
+    await page.goto(url, { waitUntil: "commit", timeout: 8000 });
+    console.log(new Date().toISOString(), "MEET_NAV_COMMIT");
+  } catch (e) {
+    console.log(new Date().toISOString(), "MEET_NAV_TIMEOUT_CONTINUE", String(e?.message || e));
   }
 
-  // Do not wait for DOMContentLoaded/network-idle: Meet is a long-lived WebRTC app
-  // and those lifecycle events can stall in containerized Chromium.
-  await sleep(8000);
+  await sleep(9000);
 
   const currentUrl = page.url();
+  console.log(new Date().toISOString(), "MEET_NAV_URL", currentUrl);
   if (!currentUrl.includes("meet.google.com/")) {
     throw new Error("Meet did not open; current URL: " + currentUrl);
   }
@@ -68,11 +88,15 @@ async function joinMeeting(page, url) {
   ]);
 
   if (!clicked) {
+    console.log(new Date().toISOString(), "MEET_JOIN_BUTTON_NOT_FOUND");
     try { await page.keyboard.press("Enter"); } catch {}
   }
 
   await sleep(9000);
-  const text = (await page.locator("body").innerText().catch(() => "")) || "";
+
+  const text = await page.locator("body").innerText({ timeout: 5000 }).catch(() => "");
+  const sample = String(text || "").replace(/\n/g, " | ").slice(0, 700);
+  console.log(new Date().toISOString(), "MEET_BODY_SAMPLE", sample);
 
   if (/you can't join this video call|لا يمكنك الانضمام/i.test(text)) {
     throw new Error("Meeting admission denied");
@@ -83,6 +107,7 @@ async function joinMeeting(page, url) {
     throw new Error("Google session is not authenticated");
   }
 
+  console.log(new Date().toISOString(), "MEET_JOIN_FLOW_DONE");
   return text;
 }
 
