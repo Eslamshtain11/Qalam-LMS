@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { spawn, execFileSync } = require("child_process");
+const { PassThrough } = require("stream");
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -131,17 +132,24 @@ async function startRecording(page, basePath) {
     "-sc_threshold", "0",
     "-f", "mpegts",
     "-muxdelay", "0",
+    "-flush_packets", "1",
     paths.video,
   ], {
     stdio: ["pipe", "ignore", "pipe"],
   });
 
+  const videoInput = new PassThrough({ highWaterMark: 8 * 1024 * 1024 });
+  videoInput.pipe(video.stdin);
   let videoTail = "";
   let canWrite = true;
   video.stderr.on("data", (d) => {
     videoTail = (videoTail + String(d)).slice(-6000);
   });
-  video.stdin.on("drain", () => { canWrite = true; });
+  videoInput.on("drain", () => { canWrite = true; });
+  videoInput.on("error", (err) => {
+    canWrite = false;
+    console.log(new Date().toISOString(), "VIDEO_INPUT_BUFFER_ERROR", String(err?.message || err));
+  });
   video.stdin.on("error", (err) => {
     canWrite = false;
     if (err?.code === "EPIPE") {
@@ -164,7 +172,7 @@ async function startRecording(page, basePath) {
     try {
       framesWritten += 1;
       bytesWritten += latestFrame.length;
-      canWrite = video.stdin.write(latestFrame);
+      canWrite = videoInput.write(latestFrame);
     } catch {}
   }, 100);
 
@@ -217,7 +225,18 @@ async function startRecording(page, basePath) {
       audioTail.replace(/\n/g, " | ").slice(-800));
   });
 
-  return { video, audio, audioFile, paths, cdp, frameTimer, statsTimer };
+  return {
+    video,
+    videoInput,
+    audio,
+    audioFile,
+    paths,
+    cdp,
+    frameTimer,
+    statsTimer,
+    captureStartedAt: Date.now(),
+    captureStoppedAt: null,
+  };
 }
 
 async function waitExit(proc, ms) {
@@ -230,7 +249,7 @@ async function waitExit(proc, ms) {
 
 async function stopRecording(session) {
   if (!session) return;
-  const { video, audio, audioFile, cdp, frameTimer, statsTimer } = session;
+  const { video, videoInput, audio, audioFile, cdp, frameTimer, statsTimer } = session;
 
   if (frameTimer) clearInterval(frameTimer);
   if (statsTimer) clearInterval(statsTimer);
@@ -241,8 +260,10 @@ async function stopRecording(session) {
     ]);
   }
 
+  session.captureStoppedAt = Date.now();
+
   if (video && video.exitCode === null) {
-    try { video.stdin.end(); } catch {}
+    try { videoInput?.end(); } catch {}
     await waitExit(video, 8000);
     if (video.exitCode === null) {
       try { video.kill("SIGINT"); } catch {}
@@ -281,6 +302,27 @@ async function stopRecording(session) {
   }
 }
 
+function probeMedia(filePath) {
+  const raw = execFileSync("ffprobe", [
+    "-v", "error",
+    "-print_format", "json",
+    "-show_entries", "format=duration:stream=codec_type,codec_name,width,height",
+    filePath,
+  ], {
+    stdio: ["ignore", "pipe", "pipe"],
+    maxBuffer: 4 * 1024 * 1024,
+  }).toString();
+  const parsed = JSON.parse(raw || "{}");
+  const streams = Array.isArray(parsed.streams) ? parsed.streams : [];
+  const duration = Number(parsed?.format?.duration || 0);
+  return {
+    duration,
+    hasVideo: streams.some((s) => s.codec_type === "video"),
+    hasAudio: streams.some((s) => s.codec_type === "audio"),
+    streams,
+  };
+}
+
 function finalizeRecording(session, outputPath) {
   const { paths } = session;
   const videoSize = fs.existsSync(paths.video) ? fs.statSync(paths.video).size : 0;
@@ -291,6 +333,17 @@ function finalizeRecording(session, outputPath) {
 
   if (videoSize < 10000) {
     throw new Error("Video capture missing or too small: " + videoSize);
+  }
+
+  const intermediateProbe = probeMedia(paths.video);
+  console.log(
+    new Date().toISOString(),
+    "INTERMEDIATE_FFPROBE_OK",
+    "duration=" + intermediateProbe.duration.toFixed(3),
+    "video=" + intermediateProbe.hasVideo,
+  );
+  if (!intermediateProbe.hasVideo || intermediateProbe.duration <= 0) {
+    throw new Error("Intermediate video failed ffprobe validation");
   }
 
   try { fs.rmSync(outputPath, { force: true }); } catch {}
@@ -334,7 +387,39 @@ function finalizeRecording(session, outputPath) {
   if (finalSize < 10000) {
     throw new Error("Final recording missing or too small: " + finalSize);
   }
-  return { videoSize, audioSize, finalSize };
+
+  const finalProbe = probeMedia(outputPath);
+  const expectedSeconds = Math.max(
+    1,
+    ((session.captureStoppedAt || Date.now()) - (session.captureStartedAt || Date.now())) / 1000,
+  );
+  console.log(
+    new Date().toISOString(),
+    "FINAL_FFPROBE_OK",
+    "duration=" + finalProbe.duration.toFixed(3),
+    "expected=" + expectedSeconds.toFixed(3),
+    "video=" + finalProbe.hasVideo,
+    "audio=" + finalProbe.hasAudio,
+  );
+  if (!finalProbe.hasVideo || finalProbe.duration <= 0) {
+    throw new Error("Final MP4 failed ffprobe video validation");
+  }
+  if (finalProbe.duration < Math.max(1, expectedSeconds * 0.70)) {
+    throw new Error(
+      "Final MP4 duration too short: " +
+      finalProbe.duration.toFixed(3) +
+      "s expected~" +
+      expectedSeconds.toFixed(3) +
+      "s",
+    );
+  }
+
+  return {
+    videoSize,
+    audioSize,
+    finalSize,
+    duration: finalProbe.duration,
+  };
 }
 
 function cleanupRecording(session, outputPath) {
