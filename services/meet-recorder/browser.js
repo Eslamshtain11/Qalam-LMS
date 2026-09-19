@@ -28,8 +28,8 @@ async function clickAny(page, labels) {
 }
 
 async function joinMeeting(page, url) {
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
-  await sleep(3500);
+  await page.goto(url, { waitUntil: "commit", timeout: 30000 });
+  await sleep(6000);
 
   await clickAny(page, [
     "Turn off microphone",
