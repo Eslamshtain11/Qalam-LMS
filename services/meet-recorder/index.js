@@ -41,6 +41,9 @@ async function runJob(job) {
     await joinMeeting(page, job.meetUrl);
     log("MEET_JOINED", job.runId);
 
+    await callControl("host_ready", { runId: job.runId });
+    log("HOST_READY", job.runId);
+
     recording = await startRecording(page, basePath);
     await sleep(2500);
 
