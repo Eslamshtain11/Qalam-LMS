@@ -3,12 +3,44 @@ const { spawn, execFileSync } = require("child_process");
 const DISPLAY = process.env.DISPLAY || ":99";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+let silenceClock = null;
+
 function exec(cmd, args = []) {
   try {
     return execFileSync(cmd, args, { stdio: ["ignore", "pipe", "pipe"] }).toString();
   } catch {
     return "";
   }
+}
+
+function ensureSilenceClock() {
+  if (silenceClock && silenceClock.exitCode === null) return;
+
+  silenceClock = spawn(
+    "ffmpeg",
+    [
+      "-hide_banner",
+      "-loglevel", "error",
+      "-re",
+      "-f", "lavfi",
+      "-i", "anullsrc=r=48000:cl=stereo",
+      "-f", "pulse",
+      "qalamrec",
+    ],
+    {
+      env: { ...process.env, DISPLAY, PULSE_SINK: "qalamrec" },
+      stdio: ["ignore", "ignore", "pipe"],
+    }
+  );
+
+  silenceClock.stderr.on("data", (d) => {
+    const s = String(d).trim();
+    if (s) console.log(new Date().toISOString(), "SILENCE_CLOCK", s.slice(-500));
+  });
+
+  silenceClock.on("exit", (code, signal) => {
+    console.log(new Date().toISOString(), "SILENCE_CLOCK_EXIT", code, signal);
+  });
 }
 
 async function ensurePulse() {
@@ -54,6 +86,9 @@ async function ensurePulse() {
 
   exec("pactl", ["set-default-sink", "qalamrec"]);
   exec("pactl", ["set-sink-mute", "qalamrec", "0"]);
+
+  ensureSilenceClock();
+  await sleep(700);
 }
 
 function startRecording(filePath) {
@@ -81,8 +116,8 @@ function startRecording(filePath) {
   ];
 
   const proc = spawn("ffmpeg", args, {
-    env: { ...process.env, DISPLAY },
-    stdio: ["pipe", "ignore", "pipe"],
+    env: { ...process.env, DISPLAY, PULSE_SINK: "qalamrec" },
+    stdio: ["ignore", "ignore", "pipe"],
   });
 
   let tail = "";
@@ -110,18 +145,16 @@ function startRecording(filePath) {
 async function stopRecording(proc) {
   if (!proc || proc.exitCode !== null) return;
 
-  try {
-    proc.stdin.write("q");
-  } catch {}
+  try { proc.kill("SIGINT"); } catch {}
 
   await Promise.race([
     new Promise((resolve) => proc.once("exit", resolve)),
-    sleep(10000),
+    sleep(8000),
   ]);
 
   if (proc.exitCode === null) {
     try { proc.kill("SIGTERM"); } catch {}
-    await sleep(2000);
+    await sleep(3000);
   }
 
   if (proc.exitCode === null) {
