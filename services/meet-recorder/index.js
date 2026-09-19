@@ -140,6 +140,7 @@ async function runJob(job) {
 async function loop() {
   await ensurePulse();
   log("QALAM_RECORDER_READY");
+  log("RECORDING_MODE", RECORDING_MODE, "nativeConfirmSeconds=" + NATIVE_CONFIRM_SECONDS);
   log("SCHEDULE_POLLING_ENABLED");
 
   while (true) {
