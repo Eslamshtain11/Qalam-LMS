@@ -54,6 +54,7 @@ chromium \
   --autoplay-policy=no-user-gesture-required \
   --remote-debugging-port=9222 \
   --remote-debugging-address=127.0.0.1 \
+  --remote-allow-origins=* \
   --user-data-dir=/data/chrome-profile \
   https://myaccount.google.com/ \
   >/tmp/chromium.log 2>&1 &
