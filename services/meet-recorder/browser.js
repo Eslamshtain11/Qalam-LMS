@@ -269,16 +269,22 @@ async function joinMeeting(page, url) {
   );
 
   const preText = String(pre.body || "");
-  const allowGuestMediaSmoke = process.env.QALAM_ALLOW_GUEST_MEDIA_SMOKE === "1";
-  if (/what's your name\?|sign in/i.test(preText) && !allowGuestMediaSmoke) {
+  const authMissing = /what's your name\?|sign in/i.test(preText);
+  const zeroTouch = process.env.QALAM_ZERO_TOUCH !== "0";
+  const allowGuestFallback =
+    zeroTouch ||
+    process.env.QALAM_ALLOW_GUEST_FALLBACK === "1" ||
+    process.env.QALAM_ALLOW_GUEST_MEDIA_SMOKE === "1";
+
+  if (authMissing && !allowGuestFallback) {
     console.log(new Date().toISOString(), "MEET_AUTH_REQUIRED");
     throw new Error("GOOGLE_AUTH_REQUIRED");
   }
-  if (/what's your name\?|sign in/i.test(preText) && allowGuestMediaSmoke) {
-    console.log(new Date().toISOString(), "MEET_GUEST_MEDIA_SMOKE_ONLY");
+  if (authMissing && allowGuestFallback) {
+    console.log(new Date().toISOString(), "MEET_AUTH_MISSING_GUEST_FALLBACK");
   }
 
-  if (!/what's your name\?|sign in/i.test(preText)) {
+  if (!authMissing) {
     await backupGoogleCookies(page.context());
   }
 
@@ -348,7 +354,7 @@ async function joinMeeting(page, url) {
 
   await sleep(6000);
   console.log(new Date().toISOString(), "MEET_JOIN_FLOW_DONE");
-  return "JOIN_CLICKED";
+  return { joined: true, mode: authMissing ? "guest" : "authenticated" };
 }
 
 async function closeBrowserGracefully() {
