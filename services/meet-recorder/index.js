@@ -87,48 +87,29 @@ async function runJob(job) {
   }
 }
 
-async function visibleAccountPage() {
-  try {
-    const connected = await connectBrowser();
-    return connected.context.pages().some((page) => {
-      try {
-        return new URL(page.url()).hostname === "myaccount.google.com";
-      } catch {
-        return false;
-      }
-    });
-  } catch {
-    return false;
-  }
-}
-
 async function runManualTestWhenReady() {
   if (!MANUAL_RUN_ID || !MANUAL_MEET_URL || fs.existsSync(MANUAL_MARKER)) return;
 
   log("MANUAL_TEST_WAITING");
 
+  const job = {
+    runId: MANUAL_RUN_ID,
+    title: MANUAL_TITLE,
+    meetUrl: MANUAL_MEET_URL,
+    occurrenceDate: MANUAL_DATE,
+    plannedSeconds: MANUAL_SECONDS,
+  };
+
   while (!fs.existsSync(MANUAL_MARKER)) {
-    if (await visibleAccountPage()) {
-      const job = {
-        runId: MANUAL_RUN_ID,
-        title: MANUAL_TITLE,
-        meetUrl: MANUAL_MEET_URL,
-        occurrenceDate: MANUAL_DATE,
-        plannedSeconds: MANUAL_SECONDS,
-      };
-
-      const ok = await runJob(job);
-      if (ok) {
-        fs.writeFileSync(MANUAL_MARKER, new Date().toISOString());
-        log("MANUAL_TEST_COMPLETED");
-        return;
-      }
-
-      log("MANUAL_TEST_RETRY");
-      await sleep(10000);
-    } else {
-      await sleep(5000);
+    const ok = await runJob(job);
+    if (ok) {
+      fs.writeFileSync(MANUAL_MARKER, new Date().toISOString());
+      log("MANUAL_TEST_COMPLETED");
+      return;
     }
+
+    log("MANUAL_TEST_RETRY");
+    await sleep(10000);
   }
 }
 
