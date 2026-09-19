@@ -219,9 +219,13 @@ async function joinMeeting(page, url) {
   );
 
   const preText = String(pre.body || "");
-  if (/what's your name\?|sign in/i.test(preText)) {
+  const allowGuestMediaSmoke = process.env.QALAM_ALLOW_GUEST_MEDIA_SMOKE === "1";
+  if (/what's your name\?|sign in/i.test(preText) && !allowGuestMediaSmoke) {
     console.log(new Date().toISOString(), "MEET_AUTH_REQUIRED");
     throw new Error("GOOGLE_AUTH_REQUIRED");
+  }
+  if (/what's your name\?|sign in/i.test(preText) && allowGuestMediaSmoke) {
+    console.log(new Date().toISOString(), "MEET_GUEST_MEDIA_SMOKE_ONLY");
   }
 
   await clickDomButton(page, [
