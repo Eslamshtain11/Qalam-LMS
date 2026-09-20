@@ -303,11 +303,15 @@ async function runJob(job) {
     const planned = maxTestSeconds > 0 ? Math.min(requested, maxTestSeconds) : requested;
     const recordSeconds = planned + GRACE_SECONDS;
 
-    if (RECORDING_MODE !== "custom" && joinMode === "authenticated") {
+    if (RECORDING_MODE !== "custom") {
+      // Native recording state is verified through the backend Google Meet API,
+      // not through browser cookies. Even when Chromium joins as a guest, the
+      // Meet Space may still auto-start Google's native recording.
+      log("NATIVE_RECORDING_CHECK", job.runId, "joinMode=" + joinMode);
       const native = await waitForNativeRecording(job.runId);
       if (native && ["STARTED", "ENDED", "FILE_GENERATED"].includes(native.state)) {
         await callControl("native_started", { runId: job.runId });
-        log("NATIVE_RECORDING_CONFIRMED", job.runId, native.state);
+        log("NATIVE_RECORDING_CONFIRMED", job.runId, native.state, "joinMode=" + joinMode);
         log("NATIVE_PRIMARY_ACTIVE", job.runId, recordSeconds);
         const lifecycle = await waitForMeetingLifecycle(job.runId, planned);
         log("NATIVE_PRIMARY_HANDOFF", job.runId, JSON.stringify(lifecycle));
@@ -315,15 +319,14 @@ async function runJob(job) {
       }
 
       if (RECORDING_MODE === "native_only") {
-        throw new Error("Native Google Meet recording was not confirmed");
+        throw new Error("Native Google Meet recording was not confirmed by the Meet API");
       }
 
-      log("NATIVE_RECORDING_NOT_CONFIRMED_FALLBACK_CUSTOM", job.runId);
-    } else if (RECORDING_MODE !== "custom" && joinMode !== "authenticated") {
-      if (RECORDING_MODE === "native_only") {
-        throw new Error("Native Google Meet recording requires an authenticated host/co-host");
-      }
-      log("AUTH_UNAVAILABLE_FALLBACK_CUSTOM", job.runId, "joinMode=" + joinMode);
+      log(
+        "NATIVE_RECORDING_NOT_CONFIRMED_FALLBACK_CUSTOM",
+        job.runId,
+        "joinMode=" + joinMode,
+      );
     }
 
     recording = await startRecording(page, basePath);
